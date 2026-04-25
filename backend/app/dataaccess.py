@@ -107,7 +107,7 @@ class DataAccess:
 
     def get_seeker_by_identifier(self, seeker_id: str = None, email: str = None):
         # seeker_id and email are not provided
-        if bool(seeker_id) and bool(email):
+        if seeker_id and email:
             raise TypeError("Either Seeker ID or email must be provided.")
 
         if seeker_id:
@@ -218,6 +218,18 @@ class DataAccess:
             "country": country,
             "jobposting_embedding": self.model.encode(summary + "\n" + responsibilities).tolist()
         })
+
+    def delete_resume(self, resume_id: str):
+        response = self.client.collections["resumes"].documents.delete({"filter_by": f"id:={resume_id}"})
+        # Nothing was deleted
+        if response["num_deleted"] < 1:
+            print(f"Resume with id {resume_id} was not found. Nothing was deleted.")
+
+    def delete_jobposting(self, jobposting_id: str):
+        response = self.client.collections["jobpostings"].documents.delete({"filter_by": f"id:={jobposting_id}"})
+        # Nothing was deleted
+        if response["num_deleted"] < 1:
+            print(f"JobPosting with id {jobposting_id} was not found. Nothing was deleted.")
 
     def get_resume_by_id(self, resume_id: str):
         try:
