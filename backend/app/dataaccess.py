@@ -3,7 +3,7 @@ import json
 import time
 import typesense as ts
 from sentence_transformers import SentenceTransformer
-from models import Seeker, Company, Resume, JobPosting
+from app.models import Seeker, Company, Resume, JobPosting
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -532,10 +532,10 @@ class EnumGetter:
     
 # Testing
 
-connection = Connection()
+# connection = Connection()
 
-db = DataAccess(connection)
-eg = EnumGetter(connection)
+# db = DataAccess(connection)
+# eg = EnumGetter(connection)
 
 # print(db.get_seeker_by_identifier("10"))
 # print(db.get_seeker_by_identifier("0"))
@@ -565,24 +565,32 @@ eg = EnumGetter(connection)
 # print(eg.get_unique_locations("seeker"))
 # print(eg.get_unique_locations("company"))
 
-resume = db.get_resume_by_id("2")
-print(resume.seeker_full_name, resume.seeker_email)
+# resume = db.get_resume_by_id("2")
+# print(resume.seeker_full_name, resume.seeker_email)
 
-jobposting = db.get_jobposting_by_id("6")
-print(jobposting.company_name, jobposting.company_email)
+# jobposting = db.get_jobposting_by_id("6")
+# print(jobposting.company_name, jobposting.company_email)
 
-jps = db.get_all_company_jobpostings("3")
-for jp in jps:
-    print(jp.company_name, jp.company_email)
+# jps = db.get_all_company_jobpostings("3")
+# for jp in jps:
+#     print(jp.company_name, jp.company_email)
 
-rsms = db.get_all_seeker_resumes("7")
-for rsm in rsms:
-    print(rsm.seeker_full_name, rsm.seeker_email)
+# rsms = db.get_all_seeker_resumes("7")
+# for rsm in rsms:
+#     print(rsm.seeker_full_name, rsm.seeker_email)
 
-rsm_ranked = db.rank_resumes_by_jobposting("11")
-for rsm in rsm_ranked:
-    print(rsm.seeker_full_name, rsm.seeker_email)
+# q_rsm = db.query_resume("Optimis")
+# for q in q_rsm:
+#     print(q.seeker_full_name, q.seeker_email)
 
-jp_ranked = db.rank_jobpostings_by_resume("7")
-for jp in jp_ranked:
-    print(jp.company_name, jp.company_email)
+# q_jp = db.query_jobposting("Develop")
+# for q in q_jp:
+#     print(q.company_name, q.company_email)
+
+# rsm_ranked = db.rank_resumes_by_jobposting("11")
+# for rsm in rsm_ranked:
+#     print(rsm.seeker_full_name, rsm.seeker_email)
+
+# jp_ranked = db.rank_jobpostings_by_resume("7")
+# for jp in jp_ranked:
+#     print(jp.company_name, jp.company_email)
