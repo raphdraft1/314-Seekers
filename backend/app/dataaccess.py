@@ -18,6 +18,7 @@ class Connection:
             "connection_timeout_seconds": 300
         })
 
+
 class DataAccess:
     def __init__(self, connection: Connection):
         self.client = connection.client
@@ -96,7 +97,7 @@ class DataAccess:
         if not company:
             return None
         
-        # Get Companu object
+        # Get Company object
         if check_password_hash(company.password, password):
             return company
 
@@ -250,30 +251,26 @@ class DataAccess:
             print(f"Jobposting collection: {e}")
             return None
     
-    def get_all_seeker_resumes(self, seeker_id: str, page_number: int = 1):
-        if not seeker_id:
-            raise TypeError("Seeker ID must be provided")
-        
+    def get_all_resumes_by_seeker(self, seeker_id: str = None, page_number: int = 1):
+
         result = self.client.collections["resumes"].documents.search({
             "q": "*",
-            "filter_by": f"seeker_id:={seeker_id}",
+            "filter_by": f"seeker_id:={seeker_id}" if seeker_id else "",
             "page": page_number,
-            "per_page": 10,
+            "per_page": 20,
             "include_fields": "$seekers(full_name, email)"
         })
 
         resume_list = self.json_to_resume_list(result)
         return resume_list
     
-    def get_all_company_jobpostings(self, company_id: str, page_number: int = 1):
-        if not company_id:
-            raise TypeError("Company ID must be provided")
-        
+    def get_all_jobpostings_by_company(self, company_id: str = None, page_number: int = 1):
+
         result = self.client.collections["jobpostings"].documents.search({
             "q": "*",
-            "filter_by": f"company_id:={company_id}",
-            "page_number": page_number,
-            "per_page": 10,
+            "filter_by": f"company_id:={company_id}" if company_id else "",
+            "page": page_number,
+            "per_page": 20,
             "include_fields": "$companies(company_name, email)"
         })
 
@@ -282,7 +279,8 @@ class DataAccess:
     
     def query_resume(self, query_text: str, skills: list[str] = None, education: int = None, 
                      exp_years: int = None, work_mode: list[str] = None, field_of_study: list[str] = None,
-                     preferred_city: str = None, preferred_state: str = None, preferred_country: str = None):
+                     preferred_city: str = None, preferred_state: str = None, preferred_country: str = None,
+                     page_number: int = 1):
         
         field_names = ["skills", "education", "preferred_city", "preferred_state", "preferred_country"]
         result = self.client.collections["resumes"].documents.search({
@@ -291,6 +289,7 @@ class DataAccess:
             "filter_by": self.build_filter(field_names, skills, education,
                                            exp_years, work_mode, field_of_study,
                                            preferred_city, preferred_state, preferred_country),
+            "page": page_number,
             "per_page": 20,
             "num_typos": 5,
             "include_fields": "$seekers(full_name, email)"
@@ -301,7 +300,7 @@ class DataAccess:
     
     def query_jobposting(self, query_text: str, required_skills: list[str] = None, required_education: int = None, 
                      exp_years: int = None, work_mode: list[str] = None, field_of_study: list[str] = None,
-                     city: str = None, state: str = None, country: str = None):
+                     city: str = None, state: str = None, country: str = None, page_number: int = 1):
         
         field_names = ["required_skills", "required_education", "city", "state", "country"]
         result = self.client.collections["jobpostings"].documents.search({
@@ -310,6 +309,7 @@ class DataAccess:
             "filter_by": self.build_filter(field_names, required_skills, required_education,
                                            exp_years, work_mode, field_of_study,
                                            city, state, country),
+            "page": page_number,
             "per_page": 20,
             "num_typos": 5,
             "include_fields": "$companies(company_name, email)"
@@ -318,13 +318,13 @@ class DataAccess:
         jobposting_list = self.json_to_jobposting_list(result)
         return jobposting_list
     
-    def rank_resumes_by_jobposting(self, jobposting_id: str):
+    def rank_resumes_by_jobposting(self, jobposting_id: str, page_number: int = 1):
         jobposting_to_use = self.get_jobposting_by_id(jobposting_id)
         owned_by_company = self.get_company_by_identifier(jobposting_to_use.company_id)
 
-        # Set an arbitrarily high number like 10000 for "unlimited recommendations" if a member
+        # Set to the total number of resumes for "unlimited recommendations" if a member
         # Set k = 10 if not a member
-        return_top_k = 10000 if owned_by_company.membership else 10
+        return_top_k = self.client.collections["resumes"].retrieve()["num_documents"] if owned_by_company.membership else 10
         
         if jobposting_to_use:
             result = self.client.multi_search.perform({
@@ -337,6 +337,7 @@ class DataAccess:
                     preferred_country:={jobposting_to_use.country}",
                     
                     "vector_query": f"resume_embedding:({jobposting_to_use.jobposting_embedding}, k:{return_top_k})",
+                    "page": page_number,
                     "per_page": 20,
                     "include_fields": "$seekers(full_name, email)"
             }]})
@@ -345,13 +346,13 @@ class DataAccess:
             return resume_list
         return []
     
-    def rank_jobpostings_by_resume(self, resume_id: str):
+    def rank_jobpostings_by_resume(self, resume_id: str, page_number: int = 1):
         resume_to_use = self.get_resume_by_id(resume_id)
         owned_by_seeker = self.get_seeker_by_identifier(resume_to_use.seeker_id)
 
-        # Set an arbitrarily high number like 10000 for "unlimited recommendations" if a member
+        # Set to the total number of job postings for "unlimited recommendations" if a member
         # Set k = 10 if not a member
-        return_top_k = 10000 if owned_by_seeker.membership else 10
+        return_top_k = self.client.collections["jobpostings"].retrieve()["num_documents"] if owned_by_seeker.membership else 10
         
         if resume_to_use:
             result = self.client.multi_search.perform({
@@ -364,6 +365,7 @@ class DataAccess:
                     country:={resume_to_use.preferred_country}",
                     
                     "vector_query": f"jobposting_embedding:({resume_to_use.resume_embedding}, k:{return_top_k})",
+                    "page": page_number,
                     "per_page": 20,
                     "include_fields": "$companies(company_name, email)"
             }]})
@@ -513,7 +515,7 @@ class EnumGetter:
                 "q": "*",
                 "query_by": "city, state, country",
                 "facet_by": "city, state, country",
-                "max_facet_values": 100
+                "max_facet_values": 300
             })
 
         if workflow == "company":
@@ -521,7 +523,7 @@ class EnumGetter:
                 "q": "*",
                 "query_by": "preferred_city, preferred_state, preferred_country",
                 "facet_by": "preferred_city, preferred_state, preferred_country",
-                "max_facet_values": 100
+                "max_facet_values": 300
             })
         
         return {
@@ -571,11 +573,13 @@ class EnumGetter:
 # jobposting = db.get_jobposting_by_id("6")
 # print(jobposting.company_name, jobposting.company_email)
 
-# jps = db.get_all_company_jobpostings("3")
+# jps = db.get_all_jobpostings_by_company("3")
+# print(jps)
 # for jp in jps:
 #     print(jp.company_name, jp.company_email)
 
-# rsms = db.get_all_seeker_resumes("7")
+# rsms = db.get_all_resumes_by_seeker("7")
+# print(rsms)
 # for rsm in rsms:
 #     print(rsm.seeker_full_name, rsm.seeker_email)
 
