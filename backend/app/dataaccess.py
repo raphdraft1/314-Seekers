@@ -3,7 +3,7 @@ import json
 import time
 import typesense as ts
 from sentence_transformers import SentenceTransformer
-from app.models import Seeker, Company, Resume, JobPosting
+from models import Seeker, Company, Resume, JobPosting
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -220,12 +220,14 @@ class DataAccess:
 
     def get_resume_by_id(self, resume_id: str):
         try:
-            result = self.client.collections["resumes"].documents[f"{resume_id}"].retrieve()
+            result = self.client.collections["resumes"].documents[f"{resume_id}"].retrieve({"include_fields": "$seekers(full_name, email)"})
             resume = Resume(id=result["id"], seeker_id=result["seeker_id"], education=result["education"],
                             experience=result["experience"], skills=result["skills"], exp_years=result["exp_years"],
                             work_mode=result["work_mode"], field_of_study=result["field_of_study"], 
                             preferred_city=result["preferred_city"], preferred_state=result["preferred_state"], 
                             preferred_country=result["preferred_country"], resume_embedding=result["resume_embedding"])
+            resume.seeker_full_name = result["seekers"]["full_name"]
+            resume.seeker_email = result["seekers"]["email"]
             return resume
     
         except ts.exceptions.ObjectNotFound as e:
@@ -234,12 +236,14 @@ class DataAccess:
         
     def get_jobposting_by_id(self, jobposting_id: str):
         try:
-            result = self.client.collections["jobpostings"].documents[f"{jobposting_id}"].retrieve()
+            result = self.client.collections["jobpostings"].documents[f"{jobposting_id}"].retrieve({"include_fields": "$companies(company_name, email)"})
             jobposting = JobPosting(id=result["id"], company_id=result["company_id"], title=result["title"],
                                 summary=result["summary"], responsibilities=result["responsibilities"],
                                 required_education=result["required_education"], required_skills=result["required_skills"], 
                                 exp_years=result["exp_years"], work_mode=result["work_mode"], field_of_study=result["field_of_study"], 
                                 city=result["city"], state=result["state"], country=result["country"], jobposting_embedding=result["jobposting_embedding"])
+            jobposting.company_name = result["companies"]["company_name"]
+            jobposting.company_email = result["companies"]["company_name"]
             return jobposting
     
         except ts.exceptions.ObjectNotFound as e:
@@ -254,7 +258,8 @@ class DataAccess:
             "q": "*",
             "filter_by": f"seeker_id:={seeker_id}",
             "page": page_number,
-            "per_page": 10
+            "per_page": 10,
+            "include_fields": "$seekers(full_name, email)"
         })
 
         resume_list = self.json_to_resume_list(result)
@@ -268,7 +273,8 @@ class DataAccess:
             "q": "*",
             "filter_by": f"company_id:={company_id}",
             "page_number": page_number,
-            "per_page": 10
+            "per_page": 10,
+            "include_fields": "$companies(company_name, email)"
         })
 
         jobposting_list = self.json_to_jobposting_list(result)
@@ -286,7 +292,8 @@ class DataAccess:
                                            exp_years, work_mode, field_of_study,
                                            preferred_city, preferred_state, preferred_country),
             "per_page": 20,
-            "num_typos": 5
+            "num_typos": 5,
+            "include_fields": "$seekers(full_name, email)"
         })
 
         resume_list = self.json_to_resume_list(result)
@@ -304,7 +311,8 @@ class DataAccess:
                                            exp_years, work_mode, field_of_study,
                                            city, state, country),
             "per_page": 20,
-            "num_typos": 5
+            "num_typos": 5,
+            "include_fields": "$companies(company_name, email)"
         })
 
         jobposting_list = self.json_to_jobposting_list(result)
@@ -329,7 +337,8 @@ class DataAccess:
                     preferred_country:={jobposting_to_use.country}",
                     
                     "vector_query": f"resume_embedding:({jobposting_to_use.jobposting_embedding}, k:{return_top_k})",
-                    "per_page": 20
+                    "per_page": 20,
+                    "include_fields": "$seekers(full_name, email)"
             }]})
 
             resume_list = self.json_to_resume_list(result["results"][0])
@@ -355,10 +364,10 @@ class DataAccess:
                     country:={resume_to_use.preferred_country}",
                     
                     "vector_query": f"jobposting_embedding:({resume_to_use.resume_embedding}, k:{return_top_k})",
-                    "per_page": 20
+                    "per_page": 20,
+                    "include_fields": "$companies(company_name, email)"
             }]})
 
-            print(result)
             jobposting_list = self.json_to_jobposting_list(result["results"][0])
             return jobposting_list
         return []
@@ -399,12 +408,15 @@ class DataAccess:
         resume_list = []
         for resume_data in json_response["hits"]:
             resume_data = resume_data["document"]
-            resume_list.append(Resume(id=resume_data["id"], seeker_id=resume_data["seeker_id"], education=resume_data["education"],
+            resume_to_append = Resume(id=resume_data["id"], seeker_id=resume_data["seeker_id"], education=resume_data["education"],
                                         experience=resume_data["experience"], skills=resume_data["skills"], exp_years=resume_data["exp_years"],
                                         work_mode=resume_data["work_mode"], field_of_study=resume_data["field_of_study"], 
                                         preferred_city=resume_data["preferred_city"], preferred_state=resume_data["preferred_state"], 
-                                        preferred_country=resume_data["preferred_country"], resume_embedding=resume_data["resume_embedding"]))
-
+                                        preferred_country=resume_data["preferred_country"], resume_embedding=resume_data["resume_embedding"])
+            resume_to_append.seeker_full_name = resume_data["seekers"]["full_name"]
+            resume_to_append.seeker_email = resume_data["seekers"]["email"]
+            resume_list.append(resume_to_append)
+            
         return resume_list
     
     def json_to_jobposting_list(self, json_response):
@@ -416,12 +428,15 @@ class DataAccess:
         jobposting_list = []
         for jobposting_data in json_response["hits"]:
             jobposting_data = jobposting_data["document"]
-            jobposting_list.append(JobPosting(id=jobposting_data["id"], company_id=jobposting_data["company_id"], title=jobposting_data["title"],
-                                summary=jobposting_data["summary"], responsibilities=jobposting_data["responsibilities"],
-                                required_education=jobposting_data["required_education"], required_skills=jobposting_data["required_skills"], 
-                                exp_years=jobposting_data["exp_years"], work_mode=jobposting_data["work_mode"], 
-                                field_of_study=jobposting_data["field_of_study"], city=jobposting_data["city"], state=jobposting_data["state"], 
-                                country=jobposting_data["country"], jobposting_embedding=jobposting_data["jobposting_embedding"]))
+            jobposting_to_append = JobPosting(id=jobposting_data["id"], company_id=jobposting_data["company_id"], title=jobposting_data["title"],
+                                              summary=jobposting_data["summary"], responsibilities=jobposting_data["responsibilities"],
+                                              required_education=jobposting_data["required_education"], required_skills=jobposting_data["required_skills"], 
+                                              exp_years=jobposting_data["exp_years"], work_mode=jobposting_data["work_mode"], 
+                                              field_of_study=jobposting_data["field_of_study"], city=jobposting_data["city"], state=jobposting_data["state"], 
+                                              country=jobposting_data["country"], jobposting_embedding=jobposting_data["jobposting_embedding"])
+            jobposting_to_append.company_name = jobposting_data["companies"]["company_name"]
+            jobposting_to_append.company_email = jobposting_data["companies"]["email"]
+            jobposting_list.append(jobposting_to_append)
 
         return jobposting_list
 
@@ -517,10 +532,10 @@ class EnumGetter:
     
 # Testing
 
-# connection = Connection()
+connection = Connection()
 
-# db = DataAccess(connection)
-# eg = EnumGetter(connection)
+db = DataAccess(connection)
+eg = EnumGetter(connection)
 
 # print(db.get_seeker_by_identifier("10"))
 # print(db.get_seeker_by_identifier("0"))
@@ -549,3 +564,25 @@ class EnumGetter:
 # print(eg.get_unique_skills("seeker"))
 # print(eg.get_unique_locations("seeker"))
 # print(eg.get_unique_locations("company"))
+
+resume = db.get_resume_by_id("2")
+print(resume.seeker_full_name, resume.seeker_email)
+
+jobposting = db.get_jobposting_by_id("6")
+print(jobposting.company_name, jobposting.company_email)
+
+jps = db.get_all_company_jobpostings("3")
+for jp in jps:
+    print(jp.company_name, jp.company_email)
+
+rsms = db.get_all_seeker_resumes("7")
+for rsm in rsms:
+    print(rsm.seeker_full_name, rsm.seeker_email)
+
+rsm_ranked = db.rank_resumes_by_jobposting("11")
+for rsm in rsm_ranked:
+    print(rsm.seeker_full_name, rsm.seeker_email)
+
+jp_ranked = db.rank_jobpostings_by_resume("7")
+for jp in jp_ranked:
+    print(jp.company_name, jp.company_email)
