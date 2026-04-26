@@ -460,31 +460,31 @@ class EnumGetter:
     
     def map_int_to_education(self, education_index):
         education_levels = {
-            0: "None", 
-            1: "Secondary", 
-            2: "Certificate I-II", 
-            3: "Certificate III-IV", 
-            4: "Diploma", 
-            5: "Advanced Diploma / Associate Degree",
-            6: "Bachelor", 
-            7: "Bachelor Honours / Graduate Certificate / Graduate Diploma", 
-            8: "Master", 
-            9: "PhD / Doctoral"
+            1: "None", 
+            2: "Secondary", 
+            3: "Certificate I-II", 
+            4: "Certificate III-IV", 
+            5: "Diploma", 
+            6: "Advanced Diploma / Associate Degree",
+            7: "Bachelor", 
+            8: "Bachelor Honours / Graduate Certificate / Graduate Diploma", 
+            9: "Master", 
+            10: "PhD / Doctoral"
         }
         return education_levels[education_index]
     
     def map_education_to_int(self, education_name):
         education_levels = {
-            "None": 0, 
-            "Secondary": 1, 
-            "Certificate I-II": 2, 
-            "Certificate III-IV": 3, 
-            "Diploma": 4, 
-            "Advanced Diploma / Associate Degree": 5,
-            "Bachelor": 6, 
-            "Bachelor Honours / Graduate Certificate / Graduate Diploma": 7, 
-            "Master": 8, 
-            "PhD / Doctoral": 9
+            "None": 1, 
+            "Secondary": 2, 
+            "Certificate I-II": 3, 
+            "Certificate III-IV": 4, 
+            "Diploma": 5, 
+            "Advanced Diploma / Associate Degree": 6,
+            "Bachelor": 7, 
+            "Bachelor Honours / Graduate Certificate / Graduate Diploma": 8, 
+            "Master": 9, 
+            "PhD / Doctoral": 10
         }
         return education_levels[education_name]
     
