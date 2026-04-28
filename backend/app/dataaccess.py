@@ -43,7 +43,7 @@ class DataAccess:
         self.embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
     def create_seeker(self, full_name: str, email: str, age: int, city: str, state: str, country: str, 
-                     short_desc: str, bio: str, password: str):
+                     short_desc: str, bio: str, password: str) -> bool:
         r"""
         Create a seeker in the Typesense instance as a document in the collection "seekers." This requires all fields listed
         in the below "Args" section.<br>  
@@ -88,7 +88,7 @@ class DataAccess:
         return True
 
     def create_company(self, company_name: str, email: str, city: str, state: str, country: str, 
-                      short_desc: str, bio: str, founded_year: int, industry: str, culture: str, password: str):
+                      short_desc: str, bio: str, founded_year: int, industry: str, culture: str, password: str) -> bool:
         r"""
         Create a company/employer in the Typesense instance as a document in the collection "companies." This requires all fields listed
         in the below "Args" section.<br>  
@@ -136,7 +136,7 @@ class DataAccess:
         })
         return True 
 
-    def authenticate_seeker(self, email: str, password: str):
+    def authenticate_seeker(self, email: str, password: str) -> Seeker | None:
         r"""
         Authenticate a Seeker according to provided email and password.<br>  
         The `password` field is to provided in a <u>plain-text</u> format, as hashing is already
@@ -161,7 +161,7 @@ class DataAccess:
         print(f"Authentication for {email} failed.")
         return None
 
-    def authenticate_company(self, email: str, password: str):
+    def authenticate_company(self, email: str, password: str) -> Company | None:
         r"""
         Authenticate a Company according to provided email and password.<br>  
         The `password` field is to provided in a <u>plain-text</u> format, as hashing is already
@@ -187,7 +187,7 @@ class DataAccess:
         return None
 
 
-    def get_seeker_by_identifier(self, seeker_id: str = None, email: str = None):
+    def get_seeker_by_identifier(self, seeker_id: str = None, email: str = None) -> Seeker | None:
         r"""
         Find a seeker by the provided identifier, either by the provided `seeker_id` or `email`. Only one identifier is sufficient
         for finding the desired seeker.<br>  
@@ -241,7 +241,7 @@ class DataAccess:
             return seeker
         
     
-    def get_company_by_identifier(self, company_id: str = None, email: str = None):
+    def get_company_by_identifier(self, company_id: str = None, email: str = None) -> Company | None:
         r"""
         Find a company by the provided identifier, either by the provided `company_id` or `email`. Only one identifier is sufficient
         for finding the desired company.<br>  
@@ -395,7 +395,7 @@ class DataAccess:
         if response["num_deleted"] < 1:
             print(f"JobPosting with id {jobposting_id} was not found. Nothing was deleted.")
 
-    def get_resume_by_id(self, resume_id: str):
+    def get_resume_by_id(self, resume_id: str) -> Resume | None:
         r"""
         Find a resume by the provided `resume_id` identifier.<br>  
         Returns a Resume object if a resume associated to the provided identifier is found, otherwise None.
@@ -422,7 +422,7 @@ class DataAccess:
             print(f"Resume collection: {e}")
             return None
         
-    def get_jobposting_by_id(self, jobposting_id: str):
+    def get_jobposting_by_id(self, jobposting_id: str) -> JobPosting | None:
         r"""
         Find a jobposting by the provided `jobposting_id` identifier.<br>  
         Returns a JobPosting object if a jobposting associated to the provided identifier is found, otherwise None.
@@ -449,7 +449,7 @@ class DataAccess:
             print(f"Jobposting collection: {e}")
             return None
     
-    def get_all_resumes_by_seeker(self, seeker_id: str = None, page_number: int = 1):
+    def get_all_resumes_by_seeker(self, seeker_id: str = None, page_number: int = 1) -> list[Resume]:
         r"""
         Find all resumes associated to a `seeker_id`.<br>  
         Returns a **list[Resume]** object if resumes associated to the provided `seeker_id` are found, otherwise an empty list.<br>  
@@ -481,10 +481,10 @@ class DataAccess:
         resume_list = self._json_to_resume_list(result)
         return resume_list
     
-    def get_all_jobpostings_by_company(self, company_id: str = None, page_number: int = 1):
+    def get_all_jobpostings_by_company(self, company_id: str = None, page_number: int = 1) -> list[JobPosting]:
         r"""
         Find all jobpostings associated to a `company_id`.<br>  
-        Returns a ****list[JobPosting]**** object if jobpostings associated to the provided `company_id` are found, otherwise an empty list.<br>  
+        Returns a **list[JobPosting]** object if jobpostings associated to the provided `company_id` are found, otherwise an empty list.<br>  
         Pagination is supported by this method.
         By default, returns a list of maximum 20 jobpostings per page. Use the `page_number` parameter to request for the
         next 20 jobpostings.
@@ -516,7 +516,7 @@ class DataAccess:
     def query_resume(self, query_text: str = "", skills: list[str] = None, education: int = None, 
                      exp_years: int = None, work_mode: list[str] = None, field_of_study: list[str] = None,
                      preferred_city: str = None, preferred_state: str = None, preferred_country: str = None,
-                     page_number: int = 1):
+                     page_number: int = 1) -> list[Resume]:
         r"""
         Find resumes relevant to the provided parameters. See the "Args" section for more detail.<br>  
         All fields listed in the "Args" section below are optional. Any parameters can be passed or left empty
@@ -582,7 +582,7 @@ class DataAccess:
     
     def query_jobposting(self, query_text: str = "", required_skills: list[str] = None, required_education: int = None, 
                      exp_years: int = None, work_mode: list[str] = None, field_of_study: list[str] = None,
-                     city: str = None, state: str = None, country: str = None, page_number: int = 1):
+                     city: str = None, state: str = None, country: str = None, page_number: int = 1) -> list[JobPosting]:
         r"""
         Find jobpostings relevant to the provided parameters. See the "Args" section for more detail.<br>  
         All fields listed in the "Args" section below are optional. Any parameters can be passed or left empty
@@ -646,7 +646,7 @@ class DataAccess:
         jobposting_list = self._json_to_jobposting_list(result)
         return jobposting_list
     
-    def rank_resumes_by_jobposting(self, jobposting_id: str, page_number: int = 1):
+    def rank_resumes_by_jobposting(self, jobposting_id: str, page_number: int = 1) -> list[Resume]:
         r"""
         Rank Top-K resumes according to its relevance to the jobposting identified by the provided `jobposting_id`.<br>  
         Returns a **list[Resume]** object if relevant resumes are found AND if the jobposting by the provided 
@@ -690,7 +690,7 @@ class DataAccess:
             return resume_list
         return []
     
-    def rank_jobpostings_by_resume(self, resume_id: str, page_number: int = 1):
+    def rank_jobpostings_by_resume(self, resume_id: str, page_number: int = 1) -> list[JobPosting]:
         r"""
         Rank Top-K jobpostings according to its relevance to the resume identified by the provided `resume_id`.<br>  
         Returns a **list[JobPosting]** object if relevant jobpostings are found AND if the resume_id by the provided 
@@ -736,7 +736,7 @@ class DataAccess:
 
     def _build_filter(self, field_names: list[str], skills: list[str] = None, education: int = None, 
                      exp_years: int = None, work_mode: list[str] = None, field_of_study: list[str] = None,
-                     city: str = None, state: str = None, country: str = None):
+                     city: str = None, state: str = None, country: str = None) -> str:
         r"""
         For internal use only. Dynamically build and return the `filter_by` string as part of a parameter in a Typesense query JSON request.<br>  
         Considering the combinatorial explosion of possible filter combinations caused by the number of fields used as filters
@@ -796,7 +796,7 @@ class DataAccess:
 
         return " && ".join(filters) if filters else ""
     
-    def _json_to_resume_list(self, json_response):
+    def _json_to_resume_list(self, json_response) -> list[Resume]:
         r"""
         For internal use only. Transform the raw JSON response returned by Typesense into list of resumes in the format
         of **list[Resume]**.<br>  
@@ -829,7 +829,7 @@ class DataAccess:
             
         return resume_list
     
-    def _json_to_jobposting_list(self, json_response):
+    def _json_to_jobposting_list(self, json_response) -> list[JobPosting]:
         r"""
         For internal use only. Transform the raw JSON response returned by Typesense into list of jobpostings in the format
         of **list[JobPosting]**.<br>  
@@ -883,7 +883,17 @@ class EnumGetter:
     def __init__(self, connection: Connection):
         self.client = connection.client
     
-    def map_int_to_education(self, education_index):
+    def map_int_to_education(self, education_index: int) -> str:
+        r"""
+        Maps an integer to its corresponding education level. Required for the ordinal categorical attribute `education` / `required_education`.<br>  
+        Returns a string describing the education level according to the integer provided by `education_index`. `education_index` ranges from
+        1 to 10, any other integer will result in a KeyError.
+
+        ## Args
+            **education_index**: *int*
+            An integer representing the education level, bounded from 1–10.
+        """
+
         education_levels = {
             1: "None", 
             2: "Secondary", 
@@ -898,7 +908,27 @@ class EnumGetter:
         }
         return education_levels[education_index]
     
-    def map_education_to_int(self, education_name):
+    def map_education_to_int(self, education_name: str) -> int:
+        r"""
+        Maps an education level name to its corresponding integer. Required for the ordinal categorical attribute `education` / `required_education`.<br>  
+        Returns an integer according to the the education level name provided by `education_name`. `education_name` covers ten different levels of education,
+        see the "Args" section for more detail. Any other education level name will result in a KeyError.
+
+        ## Args
+            **education_name**: *str*
+            A string naming the education level. Provide any of the following valid strings:
+                * None
+                * Secondary
+                * Certificate I-II
+                * Certificate III-IV 
+                * Diploma
+                * Advanced Diploma / Associate Degree
+                * Bachelor 
+                * Bachelor Honours / Graduate Certificate / Graduate Diploma 
+                * Master
+                * PhD / Doctoral
+        """
+
         education_levels = {
             "None": 1, 
             "Secondary": 2, 
@@ -913,13 +943,29 @@ class EnumGetter:
         }
         return education_levels[education_name]
     
-    def get_fields_of_study(self):
+    def get_fields_of_study(self) -> list[str]:
+        r"""
+        Returns the list of all predefined fields of study used by the intelligent job-matching platform.
+        """
         return ["Computer Science", "Artificial Intelligence", "Computer Vision", "Robotics",
                 "Software Engineering", "Data Analytics", "Machine Learning", "Deep Learning",
                 "Web Development", "Mobile Development", "UI/UX", "Cloud Computing", "Cluster Computing",
                 "Database Management", "Computer Networking", "Operating Systems", "Cybersecurity", "Logging and Monitoring"]
     
-    def get_unique_skills(self, workflow: str):
+    def get_unique_skills(self, workflow: str) -> list[str]:
+        r"""
+        Returns a list of all unique skills found in the Typesense instance, within the collection referenced by `workflow`.<br>  
+        Used for providing a selection of options in the hard filters section for the `skills` / `required_skills` attributes
+        for the general search functionality.<br>  
+        The `workflow` parameter determines the collection from which to return the set of unique skills. See the "Args" section
+        for more detail. Other unrecognised workflow names will result in the return of an empty list.
+
+        ## Args
+            **workflow**: *str*
+            The name of workflow for which to return unique skills. Can be either '**seeker**' or '**company**.'
+            Use the correct workflow name depending on the type of workflow within which the search functionality is involved.
+            For instance, for the searching of jobpostings in the **seeker** workflow, use 'seeker' as the parameter, and vice versa.
+        """
         if workflow == "seeker":
             result = self.client.collections["jobpostings"].documents.search({
                 "q": "*",
@@ -941,10 +987,27 @@ class EnumGetter:
         print("Invalid workflow name. Please pass either 'seeker' or 'company' for the workflow parameter.")
         return []
     
-    def get_unique_locations(self, workflow: str):
+    def get_unique_locations(self, workflow: str) -> dict:
         r"""
-        Used for providing a selection of ___ to select in the hard filters section.
+        Returns a dictionary of all unique locational data found in the Typesense instance, within the collection referenced by `workflow`, in the
+        format:  
+        {  
+            **"cities"**: *list[str]*,   
+            **"states"**: *list[str]*,  
+            **"countries"**: *list[str]*    
+        }<br>  
+        Used for providing a selection of options in the hard filters section for the `preferred_city` / `city`, `preferred_state` / `state`,
+        and `preferred_country` / `country` attributes for the general search functionality.<br>  
+        The `workflow` parameter determines the collection from which to return the set of unique locational information. See the "Args" section
+        for more detail. Other unrecognised workflow names will result in the return of an empty dictionary.  
+
+        ## Args
+            **workflow**: *str*
+            The name of workflow for which to return unique locational data. Can be either '**seeker**' or '**company**.'
+            Use the correct workflow name depending on the type of workflow within which the search functionality is involved.
+            For instance, for the searching of jobpostings in the **seeker** workflow, use 'seeker' as the parameter, and vice versa.
         """
+
         if workflow != "seeker" and workflow != "company":
             print("Invalid workflow name. Please pass either 'seeker' or 'company' for the workflow parameter.")
             return {}
