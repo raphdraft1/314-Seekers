@@ -10,6 +10,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 load_dotenv()
 
 class Connection:
+    r"""
+    A class to instantiate a connection to Typesense, with the following configurations:
+    * HTTP connection to localhost:8108
+    * Connection timeout set to 300 seconds (5 minutes)
+    * API key set to env variable named "TYPESENSE_API_KEY"
+    """
     def __init__(self):
         self.TYPESENSE_API_KEY = os.environ.get("TYPESENSE_API_KEY")
         self.client = ts.Client({
@@ -20,15 +26,51 @@ class Connection:
 
 
 class DataAccess:
+    r"""
+    A class that provides several helpful methods to interact with the connected Typesense instance. This class is specifically
+    designed to facilitate the creation, deletion, authentication, and management of Objects involved in the intelligent job-matching platform.
+    
+    ## Args  
+        **client**: *Connection*  
+        An initialised Connection object connected to a Typesense instance. 
+
+    ## Examples
+        >>> connection = Connection()
+    >>> db = DataAccess(connection)
+    """
     def __init__(self, connection: Connection):
         self.client = connection.client
         self.embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
     def create_seeker(self, full_name: str, email: str, age: int, city: str, state: str, country: str, 
                      short_desc: str, bio: str, password: str):
+        r"""
+        Create a seeker in the Typesense instance as a document in the collection "seekers." This requires all fields listed
+        in the below "Args" section.<br>  
+        The `password` field is to provided in a <u>plain-text</u> format, as encryption via hashing is already
+        implemented and handled by this method.<br>  
+        Returns True if a seeker is successfully inserted into Typesense, otherwise False if seeker with the provided email
+        already exists, or if the password is an empty string.  
+
+        ## Args
+            **full_name**: *str*  
+            **email**: *str*
+            **age**: *int*
+            **city**: *str*
+            **state**: *str*
+            **country**: *str*
+            **short_desc**: *str*
+            **bio**: *str*
+            **password**: *str*<br>
+            All fields above are required and mandatory.
+        """
         # Check if email already exists
-        if self.getSeekerById(email=email):
+        if self.get_seeker_by_identifier(email=email):
             print("Email is already in use.")
+            return False
+        
+        if not password.strip():
+            print("Password must not be an empty string.")
             return False
 
         self.client.collections["seekers"].documents.create({
@@ -41,15 +83,41 @@ class DataAccess:
             "short_desc": short_desc,
             "bio": bio,
             "membership": False,
-            "password": generate_password_hash(password)
+            "password": generate_password_hash(password.strip())
         })
         return True
 
     def create_company(self, company_name: str, email: str, city: str, state: str, country: str, 
                       short_desc: str, bio: str, founded_year: int, industry: str, culture: str, password: str):
+        r"""
+        Create a company/employer in the Typesense instance as a document in the collection "companies." This requires all fields listed
+        in the below "Args" section.<br>  
+        The `password` field is to provided in a <u>plain-text</u> format, as encryption via hashing is already
+        implemented and handled by this method.<br>  
+        Returns True if a company is successfully inserted into Typesense, otherwise False if seeker with the provided email
+        already exists, or if the password is an empty string.  
+
+        ## Args
+            **company_name**: *str*  
+            **email**: *str*
+            **city**: *str*
+            **state**: *str*
+            **country**: *str*
+            **short_desc**: *str*
+            **bio**: *str*
+            **founded_year**: *int*
+            **industry**: *str*
+            **culture**: *str*
+            **password**: *str*<br>
+            All fields above are required and mandatory.
+        """
         # Check if email already exists
-        if self.getCompanyById(email=email):
+        if self.get_company_by_identifier(email=email):
             print("Email is already in use.")
+            return False
+        
+        if not password.strip():
+            print("Password must not be an empty string.")
             return False
 
         self.client.collections["seekers"].documents.create({
@@ -64,19 +132,26 @@ class DataAccess:
             "industry": industry,
             "culture": culture,
             "membership": False,
-            "password": generate_password_hash(password)
+            "password": generate_password_hash(password.strip())
         })
         return True 
 
     def authenticate_seeker(self, email: str, password: str):
-        """
-        Authenticates a Seeker according to provided email and password.
-        Returns a Seeker object or None depending on authentication result.
+        r"""
+        Authenticate a Seeker according to provided email and password.<br>  
+        The `password` field is to provided in a <u>plain-text</u> format, as hashing is already
+        implemented and handled by this method for authentication.<br>  
+        Returns a Seeker object if authentication is successful, otherwise None. 
+        
+        ## Args  
+            **email**: *str*
+            **password**: *str*
         """
         # Check if user exists
-        seeker = self.getSeekerById(email=email)
+        seeker = self.get_seeker_by_identifier(email=email)
 
         if not seeker:
+            print(f"Seeker by the email {email} not found.")
             return None
         
         # Get Seeker object
@@ -87,14 +162,21 @@ class DataAccess:
         return None
 
     def authenticate_company(self, email: str, password: str):
-        """
-        Authenticates a Company according to provided email and password.
-        Returns a Company object or None depending on authentication result.
+        r"""
+        Authenticate a Company according to provided email and password.<br>  
+        The `password` field is to provided in a <u>plain-text</u> format, as hashing is already
+        implemented and handled by this method for authentication.<br>  
+        Returns a Company object if authentication is successful, otherwise None. 
+        
+        ## Args  
+            **email**: *str*
+            **password**: *str*
         """
         # Check if user exists
-        company = self.getCompanyById(email=email)
+        company = self.get_company_by_identifier(email=email)
 
         if not company:
+            print(f"Company by the email {email} not found.")
             return None
         
         # Get Company object
@@ -106,6 +188,24 @@ class DataAccess:
 
 
     def get_seeker_by_identifier(self, seeker_id: str = None, email: str = None):
+        r"""
+        Find a seeker by the provided identifier, either by the provided `seeker_id` or `email`. Only one identifier is sufficient
+        for finding the desired seeker.<br>  
+        Either `seeker_id` or `email` must be provided, if both fields are not provided, a TypeError will be raised. 
+        If both parameters are provided, `seeker_id` will be used to return a seeker.<br>  
+        Returns a Seeker object if a seeker associated to the provided identifier is found, otherwise None.
+
+        ## Args
+            **seeker_id**: *str*
+            **email**: *str*
+
+        ## Examples
+            >>> db.get_seeker_by_identifier(seeker_id="1") # Valid
+        >>> db.get_seeker_by_identifier(email="example@domain.com") # Valid  
+        >>> db.get_seeker_by_identifier(seeker_id="1", email="example@domain.com")
+        ... # Valid, but only seeker_id will be used for search
+        >>> db.get_seeker_by_identifier() # Invalid
+        """
         # seeker_id and email are not provided
         if seeker_id and email:
             raise TypeError("Either Seeker ID or email must be provided.")
@@ -131,7 +231,6 @@ class DataAccess:
 
             # No seeker found
             if len(result["hits"]) == 0:
-                print("Seeker not found.")
                 return None
             
             result = result["hits"][0]["document"]
@@ -143,6 +242,24 @@ class DataAccess:
         
     
     def get_company_by_identifier(self, company_id: str = None, email: str = None):
+        r"""
+        Find a company by the provided identifier, either by the provided `company_id` or `email`. Only one identifier is sufficient
+        for finding the desired company.<br>  
+        Either `company_id` or `email` must be provided, if both fields are not provided, a TypeError will be raised. 
+        If both parameters are provided, `company_id` will be used to return a company.<br>  
+        Returns a Company object if a company associated to the provided identifier is found, otherwise None.
+
+        ## Args
+            **company_id**: *str*
+            **email**: *str*
+
+        ## Examples
+            >>> db.get_company_by_identifier(company_id="1") # Valid
+        >>> db.get_company_by_identifier(email="example@domain.com") # Valid  
+        >>> db.get_company_by_identifier(company_id="1", email="example@domain.com")
+        ... # Valid, but only company_id will be used for search
+        >>> db.get_company_by_identifier() # Invalid
+        """
         # company_id and email are not provided
         if not company_id and not email:
             raise TypeError("Either Company ID or email must be provided.")
@@ -169,7 +286,6 @@ class DataAccess:
 
             # No seeker found
             if len(result["hits"]) == 0:
-                print("Company not found.")
                 return None
             
             result = result["hits"][0]["document"]
@@ -183,6 +299,22 @@ class DataAccess:
     def create_resume(self, seeker_id: str, education: int, experience: str, skills: list[str], exp_years: int, 
                      work_mode: list[str], field_of_study: list[str], preferred_city: str, 
                      preferred_state: str, preferred_country: str):
+        r"""
+        Create a resume in the Typesense instance as a document in the collection "resumes." This requires all fields listed
+        in the below "Args" section.
+
+        ## Args
+            **seeker_id**: *str*
+            **education**: *int*
+            **experience**: *str*
+            **skills**: *list[str]*
+            **exp_years**: *int*
+            **work_mode**: *list[str]*
+            **field_of_study**: *list[str]*
+            **preferred_city**: *str*
+            **preferred_state**: *str*
+            **preferred_country**: *str*  
+        """
         
         self.client.collections["resumes"].documents.create({
             "seeker_id": seeker_id,
@@ -202,6 +334,24 @@ class DataAccess:
                          required_education: int, required_skills: list[str], exp_years: int, 
                          work_mode: list[str], field_of_study: list[str], city: str, 
                          state: str, country: str):
+        r"""
+        Create a jobposting in the Typesense instance as a document in the collection "jobpostings." This requires all fields listed
+        in the below "Args" section. 
+
+        ## Args
+            **company_id**: *str*
+            **title**: *str*
+            **summary**: *str*
+            **responsibilities**: *str*
+            **required_education**: int
+            **required_skills**: *list[str]*
+            **exp_years**: *int*
+            **work_mode**: *list[str]*
+            **field_of_study**: *list[str]*
+            **city**: *str*
+            **state**: *str*
+            **country**: *str*  
+        """
         
         self.client.collections["jobpostings"].documents.create({
             "company_id": company_id,
@@ -220,18 +370,43 @@ class DataAccess:
         })
 
     def delete_resume(self, resume_id: str):
+        r"""
+        Delete a resume in the Typesense instance from the collection "resumes" identified by `resume_id`.<br>  
+        If no resumes are found and deleted, a notice message will be printed to the terminal.     
+
+        ## Args
+            **resume_id**: *str*
+        """
         response = self.client.collections["resumes"].documents.delete({"filter_by": f"id:={resume_id}"})
         # Nothing was deleted
         if response["num_deleted"] < 1:
             print(f"Resume with id {resume_id} was not found. Nothing was deleted.")
 
     def delete_jobposting(self, jobposting_id: str):
+        r"""
+        Delete a jobposting in the Typesense instance from the collection "jobpostings" identified by `jobposting_id`.<br>  
+        If no jobpostings are found and deleted, a notice message will be printed to the terminal.     
+
+        ## Args
+            **jobposting_id**: *str*
+        """
         response = self.client.collections["jobpostings"].documents.delete({"filter_by": f"id:={jobposting_id}"})
         # Nothing was deleted
         if response["num_deleted"] < 1:
             print(f"JobPosting with id {jobposting_id} was not found. Nothing was deleted.")
 
     def get_resume_by_id(self, resume_id: str):
+        r"""
+        Find a resume by the provided `resume_id` identifier.<br>  
+        Returns a Resume object if a resume associated to the provided identifier is found, otherwise None.
+
+        ## Args
+            **resume_id**: *str*
+
+        ## Examples
+            >>> db.get_resume_by_id(resume_id="1") # Valid
+        >>> db.get_resume_by_id() # Invalid
+        """
         try:
             result = self.client.collections["resumes"].documents[f"{resume_id}"].retrieve({"include_fields": "$seekers(full_name, email)"})
             resume = Resume(id=result["id"], seeker_id=result["seeker_id"], education=result["education"],
@@ -248,6 +423,17 @@ class DataAccess:
             return None
         
     def get_jobposting_by_id(self, jobposting_id: str):
+        r"""
+        Find a jobposting by the provided `jobposting_id` identifier.<br>  
+        Returns a JobPosting object if a jobposting associated to the provided identifier is found, otherwise None.
+
+        ## Args
+            **jobposting_id**: *str*
+
+        ## Examples
+            >>> db.get_jobposting_by_id(jobposting_id="1") # Valid
+        >>> db.get_jobposting_by_id() # Invalid
+        """
         try:
             result = self.client.collections["jobpostings"].documents[f"{jobposting_id}"].retrieve({"include_fields": "$companies(company_name, email)"})
             jobposting = JobPosting(id=result["id"], company_id=result["company_id"], title=result["title"],
@@ -264,6 +450,25 @@ class DataAccess:
             return None
     
     def get_all_resumes_by_seeker(self, seeker_id: str = None, page_number: int = 1):
+        r"""
+        Find all resumes associated to a `seeker_id`.<br>  
+        Returns a **list[Resume]** object if resumes associated to the provided `seeker_id` are found, otherwise an empty list.<br>  
+        Pagination is supported by this method.
+        By default, returns a list of maximum 20 resumes per page. Use the `page_number` parameter to request for the
+        next 20 resumes.
+
+        ## Args
+            **seeker_id**: *str*
+            **page_number**: *int* | default = 1 (Optional)
+
+        ## Examples
+            >>> db.get_all_resumes_by_seeker(seeker_id="1") 
+        ... # Valid, returns the first 20 resumes for this seeker
+        >>> db.get_all_resumes_by_seeker(seeker_id="1", page_number=1) 
+        ... # Valid, identical to the above
+        >>> db.get_all_resumes_by_seeker(seeker_id="1", page_number=2)
+        ... # Valid, returns the next 20 resumes for this seeker 
+        """
 
         result = self.client.collections["resumes"].documents.search({
             "q": "*",
@@ -273,10 +478,29 @@ class DataAccess:
             "include_fields": "$seekers(full_name, email)"
         })
 
-        resume_list = self.json_to_resume_list(result)
+        resume_list = self._json_to_resume_list(result)
         return resume_list
     
     def get_all_jobpostings_by_company(self, company_id: str = None, page_number: int = 1):
+        r"""
+        Find all jobpostings associated to a `company_id`.<br>  
+        Returns a ****list[JobPosting]**** object if jobpostings associated to the provided `company_id` are found, otherwise an empty list.<br>  
+        Pagination is supported by this method.
+        By default, returns a list of maximum 20 jobpostings per page. Use the `page_number` parameter to request for the
+        next 20 jobpostings.
+
+        ## Args
+            **company_id**: *str*
+            **page_number**: *int* | default = 1 (Optional)
+
+        ## Examples
+            >>> db.get_all_jobpostings_by_company(company_id="1") 
+        ... # Valid, returns the first 20 jobpostings for this company
+        >>> db.get_all_jobpostings_by_company(company_id="1", page_number=1) 
+        ... # Valid, identical to the above
+        >>> db.get_all_jobpostings_by_company(company_id="1", page_number=2)
+        ... # Valid, returns the next 20 jobpostings for this company 
+        """
 
         result = self.client.collections["jobpostings"].documents.search({
             "q": "*",
@@ -286,19 +510,65 @@ class DataAccess:
             "include_fields": "$companies(company_name, email)"
         })
 
-        jobposting_list = self.json_to_jobposting_list(result)
+        jobposting_list = self._json_to_jobposting_list(result)
         return jobposting_list
     
-    def query_resume(self, query_text: str, skills: list[str] = None, education: int = None, 
+    def query_resume(self, query_text: str = "", skills: list[str] = None, education: int = None, 
                      exp_years: int = None, work_mode: list[str] = None, field_of_study: list[str] = None,
                      preferred_city: str = None, preferred_state: str = None, preferred_country: str = None,
                      page_number: int = 1):
+        r"""
+        Find resumes relevant to the provided parameters. See the "Args" section for more detail.<br>  
+        All fields listed in the "Args" section below are optional. Any parameters can be passed or left empty
+        to return relevant resumes. Searches done with some parameters left empty will return results based on parameters
+        provided in the method.<br>  
+        If **all fields are left empty**, the method returns **ALL** resumes from the "resumes" collection
+        in the Typesense instance.<br>  
+        Returns a **list[Resume]** object if resumes matching the search criteria are found, otherwise an empty list.<br>  
+        Pagination is supported by this method.
+        By default, returns a list of maximum 20 resumes per page. Use the `page_number` parameter to request for the
+        next 20 resumes.
+
+        ## Args (All Optional)
+            ### Search bar parameters
+            **query_text**: *str*  
+            Text entered in the search bar.
+            <br>  
+            ### Hard filter parameters
+            **skills**: *list[str]*
+            **education**: *int*
+            **exp_years**: *int*
+            **work_mode**: *list[str]*
+            **field_of_study**: *list[str]*
+            **preferred_city**: *str*
+            **preferred_state**: *str*
+            **preferred_country**: *str*
+            <br>
+            ### Pagination support
+            **page_number**: *int*
+        <br>  
+
+        ## Examples
+            >>> db.query_resume()
+        ... # Valid, returns the first 20 of ALL resumes found in Typesense
+        >>> db.query_resume(page_number=2)
+        ... # Valid, returns the next 20 of ALL resumes found in Typesense
+        >>> db.query_resume(query_text="Optimis") 
+        ... # Valid, returns the first 20 resumes that contain the substring "Optimis"
+        >>> db.query_resume(query_text="Optimis", page_number=1) 
+        ... # Valid, identical to the above
+        >>> db.query_resume(query_text="Optimis", page_number=2)
+        ... # Valid, returns the next 20 resumes that contain the substring "Optimis"
+        >>> db.query_resume(query_text="Optimis", skills=["Vue 3", "Django", "Python"], education=6, 
+        ... work_mode=["Remote", "Hybrid"], preferred_state="New South Wales")
+        ... # Valid, returns the first 20 resumes that match the above criteria
+        """
         
         field_names = ["skills", "education", "preferred_city", "preferred_state", "preferred_country"]
         result = self.client.collections["resumes"].documents.search({
-            "q": f"{query_text if query_text else "*"}",
+            "q": f"{query_text.strip() if query_text or query_text.strip() else "*"}",
             "query_by": "experience, skills, field_of_study",
-            "filter_by": self.build_filter(field_names, skills, education,
+            "filter_by": self._build_filter(field_names, skills, education,
                                            exp_years, work_mode, field_of_study,
                                            preferred_city, preferred_state, preferred_country),
             "page": page_number,
@@ -307,18 +577,64 @@ class DataAccess:
             "include_fields": "$seekers(full_name, email)"
         })
 
-        resume_list = self.json_to_resume_list(result)
+        resume_list = self._json_to_resume_list(result)
         return resume_list
     
-    def query_jobposting(self, query_text: str, required_skills: list[str] = None, required_education: int = None, 
+    def query_jobposting(self, query_text: str = "", required_skills: list[str] = None, required_education: int = None, 
                      exp_years: int = None, work_mode: list[str] = None, field_of_study: list[str] = None,
                      city: str = None, state: str = None, country: str = None, page_number: int = 1):
+        r"""
+        Find jobpostings relevant to the provided parameters. See the "Args" section for more detail.<br>  
+        All fields listed in the "Args" section below are optional. Any parameters can be passed or left empty
+        to return relevant jobpostings. Searches done with some parameters left empty will return results based on parameters
+        provided in the method.<br>  
+        If **all fields are left empty**, the method returns **ALL** jobpostings from the "jobpostings" collection
+        in the Typesense instance.<br>  
+        Returns a **list[JobPosting]** object if jobpostings matching the search criteria are found, otherwise an empty list.<br>  
+        Pagination is supported by this method.
+        By default, returns a list of maximum 20 jobpostings per page. Use the `page_number` parameter to request for the
+        next 20 jobpostings.
+
+        ## Args (All Optional)
+            ### Search bar parameters
+            **query_text**: *str*  
+            Text entered in the search bar.
+            <br>  
+            ### Hard filter parameters
+            **required_skills**: *list[str]*
+            **required_education**: *int*
+            **exp_years**: *int*
+            **work_mode**: *list[str]*
+            **field_of_study**: *list[str]*
+            **city**: *str*
+            **state**: *str*
+            **country**: *str*
+            <br>
+            ### Pagination support
+            **page_number**: *int*
+        <br>  
+
+        ## Examples
+            >>> db.query_jobposting()
+        ... # Valid, returns the first 20 of ALL jobpostings found in Typesense
+        >>> db.query_jobposting(page_number=2)
+        ... # Valid, returns the next 20 of ALL jobpostings found in Typesense
+        >>> db.query_jobposting(query_text="Develop") 
+        ... # Valid, returns the first 20 jobpostings that contain the substring "Develop"
+        >>> db.query_jobposting(query_text="Develop", page_number=1) 
+        ... # Valid, identical to the above
+        >>> db.query_jobposting(query_text="Develop", page_number=2)
+        ... # Valid, returns the next 20 jobpostings that contain the substring "Develop"
+        >>> db.query_jobposting(query_text="Develop", required_skills=["SQL Server", "MongoDB", "Redis"],  
+        ... required_education=5, work_mode=["Remote", "Hybrid", "On-site"], state="Australian Capital Territory")
+        ... # Valid, returns the first 20 jobpostings that match the above criteria
+        """
         
         field_names = ["required_skills", "required_education", "city", "state", "country"]
         result = self.client.collections["jobpostings"].documents.search({
-            "q": f"{query_text if query_text else "*"}",
+            "q": f"{query_text.strip() if query_text or query_text.strip() else "*"}",
             "query_by": "title, summary, responsibilities, required_skills, field_of_study",
-            "filter_by": self.build_filter(field_names, required_skills, required_education,
+            "filter_by": self._build_filter(field_names, required_skills, required_education,
                                            exp_years, work_mode, field_of_study,
                                            city, state, country),
             "page": page_number,
@@ -327,10 +643,26 @@ class DataAccess:
             "include_fields": "$companies(company_name, email)"
         })
 
-        jobposting_list = self.json_to_jobposting_list(result)
+        jobposting_list = self._json_to_jobposting_list(result)
         return jobposting_list
     
     def rank_resumes_by_jobposting(self, jobposting_id: str, page_number: int = 1):
+        r"""
+        Rank Top-K resumes according to its relevance to the jobposting identified by the provided `jobposting_id`.<br>  
+        Returns a **list[Resume]** object if relevant resumes are found AND if the jobposting by the provided 
+        `jobposting_id` exists, otherwise an empty list.<br>  
+        The ranking is done through a hybrid search in Typesense, where keyword matching, vector similarity, and hard filters are utilised
+        to produce the final list of Top-K resumes found to be the most relevant to the provided jobposting. The vectors are generated
+        by the embedding model specified by the `model` attribute in the `DataAccess` instance.<br>  
+        Top-K is determined by the jobposting's owner's membership status; where K is "unlimited" if a member or 10 otherwise.<br>
+        Pagination is supported by this method.<br>  
+        By default, returns a list of maximum 20 resumes per page. Use the `page_number` parameter to request for the
+        next 20 resumes. No extra parameters are required by this method, as the search is always done through the contents of the provided jobposting.  
+
+        ## Args
+            **jobposting_id**: *str*
+            **page_number**: *int*  
+        """
         jobposting_to_use = self.get_jobposting_by_id(jobposting_id)
         owned_by_company = self.get_company_by_identifier(jobposting_to_use.company_id)
 
@@ -354,11 +686,27 @@ class DataAccess:
                     "include_fields": "$seekers(full_name, email)"
             }]})
 
-            resume_list = self.json_to_resume_list(result["results"][0])
+            resume_list = self._json_to_resume_list(result["results"][0])
             return resume_list
         return []
     
     def rank_jobpostings_by_resume(self, resume_id: str, page_number: int = 1):
+        r"""
+        Rank Top-K jobpostings according to its relevance to the resume identified by the provided `resume_id`.<br>  
+        Returns a **list[JobPosting]** object if relevant jobpostings are found AND if the resume_id by the provided 
+        `resume_id` exists, otherwise an empty list.<br>  
+        The ranking is done through a hybrid search in Typesense, where keyword matching, vector similarity, and hard filters are utilised
+        to produce the final list of Top-K jobpostings found to be the most relevant to the provided resume. The vectors are generated
+        by the embedding model specified by the `model` attribute in the `DataAccess` instance.<br>  
+        Top-K is determined by the resume's owner's membership status; where K is "unlimited" if a member or 10 otherwise.<br>
+        Pagination is supported by this method.<br>  
+        By default, returns a list of maximum 20 jobpostings per page. Use the `page_number` parameter to request for the
+        next 20 jobpostings. No extra parameters are required by this method, as the search is always done through the contents of the provided resume.  
+
+        ## Args
+            **resume_id**: *str*
+            **page_number**: *int*  
+        """
         resume_to_use = self.get_resume_by_id(resume_id)
         owned_by_seeker = self.get_seeker_by_identifier(resume_to_use.seeker_id)
 
@@ -382,13 +730,48 @@ class DataAccess:
                     "include_fields": "$companies(company_name, email)"
             }]})
 
-            jobposting_list = self.json_to_jobposting_list(result["results"][0])
+            jobposting_list = self._json_to_jobposting_list(result["results"][0])
             return jobposting_list
         return []
 
-    def build_filter(self, field_names: list[str], skills: list[str] = None, education: int = None, 
+    def _build_filter(self, field_names: list[str], skills: list[str] = None, education: int = None, 
                      exp_years: int = None, work_mode: list[str] = None, field_of_study: list[str] = None,
                      city: str = None, state: str = None, country: str = None):
+        r"""
+        For internal use only. Dynamically build and return the `filter_by` string as part of a parameter in a Typesense query JSON request.<br>  
+        Considering the combinatorial explosion of possible filter combinations caused by the number of fields used as filters
+        in the system, this provides an elegant way to append conditions depending on attributes that are actually set
+        in the filters.<br>  
+        This method can be used anywhere a `filter_by` string needs to be used for building a Typesense query,
+        assuming the query uses the same set of filters featuring attributes supported by the method.
+        See the "Args" section for more detail.
+
+        ## Args
+            ### Required
+            **field_names**: *list[str]*
+            The field names specifically referencing the skills-, education-, city-, state-, and country-like attributes
+            as named in a given Typesense collection. Implemented to explicitly support the slight differences in naming
+            between the **resumes** and **jobpostings** collections.<br>    
+            <br>  
+            ### Optional
+            **skills**: *list[str]*
+            The list of skills to include as part of the query condition.<br>  
+            **education**: *int*
+            The education level to include as part of the query condition.<br>  
+            **exp_years**: *int*
+            The number of years of experience to include as part of the query condition.<br>  
+            **work_mode**: *list[str]*
+            The list of work modes to include as part of the query condition.<br>  
+            **field_of_study**: *list[str]*
+            The list of field of study tags to include as part of the query collection.<br>  
+            **city**: *str*
+            The city name to include as part of the query collection.<br>  
+            **state**: *str*
+            The state name to include as part of the query collection.<br>  
+            **country**: *str*
+            The country name to include as part of the query collection.<br>  
+        """
+
         filters = []
 
         if skills:
@@ -413,7 +796,20 @@ class DataAccess:
 
         return " && ".join(filters) if filters else ""
     
-    def json_to_resume_list(self, json_response):
+    def _json_to_resume_list(self, json_response):
+        r"""
+        For internal use only. Transform the raw JSON response returned by Typesense into list of resumes in the format
+        of **list[Resume]**.<br>  
+        Returns a **list[Resume]** object if the response contains resume results, otherwise an empty list.<br>   
+        This method can be used anywhere a raw JSON response string needs to be transformed into an object form for smoother
+        OOP processing.
+
+        ## Args
+            **json_response**: *dict*
+            A raw JSON response returned from a Typesense query. This requires the `hits` portion to be exposed as a 
+            top-level key-value pair in the response body.  
+        """
+
         # No resumes found
         if len(json_response["hits"]) == 0:
             print("No resumes found for the given query.")
@@ -433,7 +829,19 @@ class DataAccess:
             
         return resume_list
     
-    def json_to_jobposting_list(self, json_response):
+    def _json_to_jobposting_list(self, json_response):
+        r"""
+        For internal use only. Transform the raw JSON response returned by Typesense into list of jobpostings in the format
+        of **list[JobPosting]**.<br>  
+        Returns a **list[JobPosting]** object if the response contains jobposting results, otherwise an empty list.<br>   
+        This method can be used anywhere a raw JSON response string needs to be transformed into an object form for smoother
+        OOP processing.
+
+        ## Args
+            **json_response**: *dict*
+            A raw JSON response returned from a Typesense query. This requires the `hits` portion to be exposed as a 
+            top-level key-value pair in the response body.  
+        """
         # No job postings found
         if len(json_response["hits"]) == 0:
             print("No job postings found for given Company.")
@@ -454,7 +862,24 @@ class DataAccess:
 
         return jobposting_list
 
+
 class EnumGetter:
+    r"""
+    A class that returns all unique values of enum-type variables. This includes fields with predefined values, fields with user-defined values,
+    and fields where integers correspond to certain ordinal concepts.<br>  
+    For fields with user-defined values, all unique values are returned from the connected Typesense instance, within the context of certain collections.<br>  
+    This class is specifically designed to provide the backend and frontend with unique values for the fields `education` / `required_education`, `field_of_study`,
+    `skills` / `required_skills`, `preferred_city` / `city`, `preferred_state` / `state`, and `preferred_country` / `country` involved in the intelligent job-matching platform,
+    particularly values to be included the filter options for each attribute for a given workflow (`seeker` or `company`).
+    
+    ## Args  
+        **client**: *Connection*  
+        An initialised Connection object connected to a Typesense instance. 
+
+    ## Examples
+        >>> connection = Connection()
+    >>> eg = EnumGetter(connection)
+    """
     def __init__(self, connection: Connection):
         self.client = connection.client
     
@@ -517,6 +942,9 @@ class EnumGetter:
         return []
     
     def get_unique_locations(self, workflow: str):
+        r"""
+        Used for providing a selection of ___ to select in the hard filters section.
+        """
         if workflow != "seeker" and workflow != "company":
             print("Invalid workflow name. Please pass either 'seeker' or 'company' for the workflow parameter.")
             return {}
