@@ -1,0 +1,110 @@
+[
+    {
+        "id": "0",
+        "full_name": "Alex Mercer",
+        "email": "alexmercer@gmail.com",
+        "age": 29,
+        "city": "San Francisco",
+        "state": "California",
+        "country": "United States of America",
+        "short_desc": "Full stack engineer specialising in performance and real-time systems",
+        "bio": "I've spent the last six years obsessing over the gap between a good product and a fast one. I started out building monoliths, broke a few of them in production, and came out the other side with a deep appreciation for thoughtful architecture.\nThese days I'm most energised when I'm working at the intersection of developer experience and end-user performance, with a particular obsession for shaving milliseconds off latency. If a page loads in under a second, I consider it a good day.\nOutside of work, I contribute to open-source Node.js libraries and mentor students through a local coding bootcamp.",
+        "membership": true
+    },
+    {
+        "id": "1",
+        "full_name": "Priya Nair",
+        "email": "pnair@hotmail.com",
+        "age": 31,
+        "city": "Bangalore",
+        "state": "Karnataka",
+        "country": "India",
+        "short_desc": "Full stack engineer with a focus on secure search, access control, and data-driven web platforms",
+        "bio": "I grew up tinkering with websites on a slow internet connection, which probably explains why I care so much about efficiency. After graduating at IIT Bombay I moved into product engineering at a series of fast-growing e-commerce startups. My work tends to gravitate toward the unglamorous but critical stuff — permissions systems, search pipelines, background jobs — the parts of a product that users never notice until they break.\nI thrive in cross-functional teams where I get to talk to analysts and designers as much as I talk to engineers, and enjoy translating complex data pipelines into intuitive user-facing dashboards. In my spare time, I write a technical blog on Django performance patterns.",
+        "membership": false
+    },
+    {
+        "id": "2",
+        "full_name": "Jordan Lee",
+        "email": "jlee@gmail.com",
+        "age": 27,
+        "city": "Sydney",
+        "state": "New South Wales",
+        "country": "Australia",
+        "short_desc": "Cross-platform mobile developer passionate about smooth UX and hardware-connected applications",
+        "bio": "I fell into mobile development after getting frustrated that the fitness apps I used didn't talk to my gear properly. That was when I took the opportunity to build a step-tracking app for a university wellness initiative. That side project turned into a career, where I joined a health-tech startup right after graduation where I led the mobile team through two major app relaunches. Now, I spend my days making sure apps feel native regardless of which OS they're running on. I have a soft spot for anything that involves hardware integration (Bluetooth, wearables, sensors), and the moment software meets the physical world is where I feel most at home. I currently spend my weekends prototyping wearable companion apps in my home lab.",
+        "membership": false
+    },
+    {
+        "id": "3",
+        "full_name": "Same Okafor",
+        "email": "okaforsam@yahoo.com",
+        "age": 34,
+        "city": "Lagos",
+        "state": "Lagos State",
+        "country": "Nigeria",
+        "short_desc": "Senior iOS engineer focused on reliable architecture, accessibility, and developer mentorship",
+        "bio": "I built my first iOS app during the early App Store gold rush and have since then fallen in love with mobile development. I've been writing Swift since the year it launched, and I still find it exciting. Most of my career has been in fintech for enterprise softwares, which means I've built for users who can't afford for things to go wrong. That pressure made me a much more careful engineer, so I bring a pragmatic, user-first perspective to every project I take on.\nBeyond the code, I invest a lot of energy in the people around me; some of my proudest moments have been watching junior developers I mentored ship their first solo features. I run a monthly iOS architecture workshop for junior developers in my team and am currently working on a guide on offline-first mobile design patterns.",
+        "membership": true
+    },
+    {
+        "id": "4",
+        "full_name": "Mia Chen",
+        "email": "chenm@proton.me",
+        "age": 28,
+        "city": "Newcastle",
+        "state": "New South Wales",
+        "country": "Australia",
+        "short_desc": "Flutter engineer building compliant, high-performance healthcare apps with seamless cross-platform experiences",
+        "bio": "Healthcare is a domain that genuinely changes people's lives, and that's why I chose to focus my career here. Transitioning from a nursing background into software engineering wasn't easy, it gave me a valuable dual perspective on healthcare product development. I work in Flutter because a single codebase means I can focus on getting the product right rather than maintaining two parallel ones. I care deeply about compliance like HIPAA, privacy, data handling, accessibility etc, not as a checkbox but because the people using these apps are often in vulnerable moments and they deserve software that treats their data with respect.",
+        "membership": true
+    },
+    {
+        "id": "5",
+        "full_name": "Eli Vasquez",
+        "email": "eli@vasquez.me",
+        "age": 31,
+        "city": "Carlton",
+        "state": "Victoria",
+        "country": "Australia",
+        "short_desc": "Robotics engineer bridging perception, motion planning, and real-world autonomous systems",
+        "bio": "I built my first robot arm out of salvaged servo motors at university and haven't really stopped since. My work now lives in the gap between a robot that works in a lab and one that works reliably in a messy warehouse at 2am. I'm drawn to hard sensor-fusion and localisation problems, specifically the kind where you can't cheat with GPS and you have to trust your maths. After completing my MSc in Autonomous Systems at TU Munich, I've since worked on AMR fleets and industrial manipulation arms across logistics and manufacturing settings. When I'm not debugging motion planners, I'm probably reading about control theory or hiking somewhere with bad phone signal.",
+        "membership": false
+    },
+    {
+        "id": "6",
+        "full_name": "Dana Park",
+        "email": "danapark@gmail.com",
+        "age": 30,
+        "city": "Strathfield",
+        "state": "New South Wales",
+        "country": "Australia",
+        "short_desc": "Cloud infrastructure enthusiast with a passion for reliable GitOps, cost efficiency, and observable systems",
+        "bio": "I used to be a sysadmin who clicked through consoles for hours, then a backend developer tinkering with system internals before gravitating toward the infrastructure layer. The day I discovered infrastructure-as-code, everything changed.\nNow I spend my time making sure that deploying software is boring in the best possible way, when it's predictable, automated, and reversible. I'm particularly passionate about observability; you can't fix what you can't see, and I've seen too many scale-up teams flying blind in production during my consultations on cloud architecture and platform engineering. Cloud cost optimisation is my guilty pleasure, because finding a $140K annual saving feels like winning. I am a proud holder of AWS Solutions Architect and CKA certifications.",
+        "membership": true
+    },
+    {
+        "id": "7",
+        "full_name": "Ravi Sundram",
+        "email": "ravis@yahoo.com",
+        "age": 35,
+        "city": "London",
+        "state": "England",
+        "country": "United Kingdom",
+        "short_desc": "Business-focused data scientist turning customer behaviour and messy commercial signals into measurable growth",
+        "bio": "I came to industry data science roles across retail and SaaS from an economics background, which means I've always cared more about the decision at the end of the analysis than the model in the middle. I studied econometrics at the London School of Economics before spending 3 years in management consulting, where I developed a knack for making complex analysis legible to non-technical people.\nI work best when I'm embedded with commercial teams — sitting in on pricing meetings, listening to what sales is worried about — because the best models are the ones that answer questions people are actually asking. I've shipped everything from churn predictors to NLP classifiers, but I measure success in revenue impact and analyst hours saved, not always in accuracy scores. Outside of work, you can catch me as a regular contributor to Towards Data Science.",
+        "membership": false
+    },
+    {
+        "id": "8",
+        "full_name": "Lena Hoffmann",
+        "email": "lenah@logml.me",
+        "age": 28,
+        "city": "Amsterdam", 
+        "state": "North Holland",
+        "country": "Netherlands",
+        "short_desc": "Data scientist optimising and forecasting networks, fleets, and supply chains with ML",
+        "bio": "I find something deeply satisfying about the fact that good maths can mean a truck drives 17% fewer kilometres — that's fuel saved, emissions reduced, and a driver home earlier.\nI've spent a decade at the intersection of operations research and machine learning, and I still get excited every time a new optimisation model beats the baseline. After my thesis on vehicle routing heuristics at TU Delft, I have spent my time at a major European 3PL provider translating academic optimisation theory into production systems that move real freight.\nMy work spans route planning, demand forecasting, and anomaly detection, but the common thread is always the same: turning complex, messy operational data into something a dispatcher or supply chain manager can actually act on. In my off time I compete in online operations research challenges on Kaggle and AIMMS.",
+        "membership": true
+    }
+]

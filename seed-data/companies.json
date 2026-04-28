@@ -1,0 +1,58 @@
+[
+    {
+        "id": "0", 
+        "company_name": "Veloq Robotics", 
+        "email": "talent@veloq.ai",
+        "short_desc": "Autonomous Robotics & Vision Company", 
+        "bio": "Veloq is redefining the boundary between machine perception and physical action. We build autonomous systems that see, reason, and move — from precision manipulation arms on factory floors to aerial inspection platforms operating in environments too dangerous for humans. Our research and engineering teams work in lockstep, closing the loop between simulation and the real world faster than anyone else in the industry.", 
+        "city": "Melbourne",
+        "state": "Victoria", 
+        "country": "Australia", 
+        "founded_year": 2018, 
+        "industry": "Robotics / Industrial Automation / Computer Vision", 
+        "culture": "Deep-tech research culture with a strong bias toward shipping. Flat hierarchy, lots of whiteboard time, occasional singed circuit boards.",
+        "membership": false
+    },
+    {
+        "id": "1", 
+        "company_name": "Lumen AI",
+        "email": "careers@lumenai.io", 
+        "short_desc": "AI/NLP Product Company", 
+        "bio": "Lumen builds intelligent document and knowledge infrastructure for the enterprises that run the world. Our platform ingests, understands, and surfaces information at a scale and speed no human team could match — turning unstructured chaos into decisions. We believe language is the operating system of business, and we're writing the runtime.", 
+        "city": "Sydney", 
+        "state": "New South Wales", 
+        "country": "Australia", 
+        "founded_year": 2020, 
+        "industry": "AI / SaaS / Enterprise Software", 
+        "culture": "Moves fast, obsesses over product quality, and takes language seriously. Remote-friendly with a strong async culture and quarterly on-sites.",
+        "membership": true
+    },
+    {
+        "id": "2", 
+        "company_name": "Traxion", 
+        "email": "recruitment@traxion.com.au",
+        "short_desc": "Logistics & Transportation Tech", 
+        "bio": "Traxion powers the nervous system of modern logistics. Our platform fuses real-time telemetry, demand forecasting, and route intelligence to help freight operators, transit authorities, and delivery networks make smarter decisions at every kilometre. We don't just analyse movement — we optimise it.", 
+        "city": "Brisbane",
+        "state": "Queensland", 
+        "country": "Australia", 
+        "founded_year": 2016, 
+        "industry": "Logistics Tech / Supply Chain / Transportation", 
+        "culture": "Operationally rigorous and data-obsessed. A team that respects domain expertise and prizes reliability — both in its software and its people.",
+        "membership": false
+    },
+    {
+        "id": "3", 
+        "company_name": "Ironclad Systems", 
+        "email": "careers@ironcladsystems.com.au",
+        "short_desc": "Cybersecurity & Infrastructure Firm", 
+        "bio": "Ironclad Systems is the firm enterprises call when the stakes are too high to guess. We deliver red team engagements, managed infrastructure security, and hardened data operations for organisations in finance, defence, healthcare, and critical infrastructure. Our philosophy is simple: know your adversary better than they know themselves.", 
+        "city": "Canberra", 
+        "state" : "Australian Capital Territory", 
+        "country": "Australia", 
+        "founded_year": 2013, 
+        "industry": "Cybersecurity / Managed IT / Enterprise Infrastructure", 
+        "culture": "Methodical, clearance-friendly, and discreet. High trust, high autonomy. The kind of place where people stay for a decade.",
+        "membership": true
+    }
+]
