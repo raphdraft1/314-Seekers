@@ -566,7 +566,7 @@ class DataAccess:
         
         field_names = ["skills", "education", "preferred_city", "preferred_state", "preferred_country"]
         result = self.client.collections["resumes"].documents.search({
-            "q": f"{query_text.strip() if query_text or query_text.strip() else "*"}",
+            "q": f"{"*" if not query_text or not query_text.strip() else query_text.strip()}",
             "query_by": "experience, skills, field_of_study",
             "filter_by": self._build_filter(field_names, skills, education,
                                            exp_years, work_mode, field_of_study,
@@ -632,7 +632,7 @@ class DataAccess:
         
         field_names = ["required_skills", "required_education", "city", "state", "country"]
         result = self.client.collections["jobpostings"].documents.search({
-            "q": f"{query_text.strip() if query_text or query_text.strip() else "*"}",
+            "q": f"{"*" if not query_text or not query_text.strip() else query_text.strip()}",
             "query_by": "title, summary, responsibilities, required_skills, field_of_study",
             "filter_by": self._build_filter(field_names, required_skills, required_education,
                                            exp_years, work_mode, field_of_study,
