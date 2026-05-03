@@ -869,8 +869,11 @@ class EnumGetter:
     and fields where integers correspond to certain ordinal concepts.<br>  
     For fields with user-defined values, all unique values are returned from the connected Typesense instance, within the context of certain collections.<br>  
     This class is specifically designed to provide the backend and frontend with unique values for the fields `education` / `required_education`, `field_of_study`,
-    `skills` / `required_skills`, `preferred_city` / `city`, `preferred_state` / `state`, and `preferred_country` / `country` involved in the intelligent job-matching platform,
-    particularly values to be included the filter options for each attribute for a given workflow (`seeker` or `company`).
+    `skills` / `required_skills`, `preferred_city` / `city`, `preferred_state` / `state`, and `preferred_country` / `country` involved in the intelligent job-matching platform.
+    This primarily serves two purposes:  
+    * Get values to be included in the filter options for each attribute for a given workflow (seeker or company) during a search operation,
+    * Get values to offer as selections for some fields to the user during account and resume / jobposting creation.
+
     
     ## Args  
         **client**: *Connection*  
