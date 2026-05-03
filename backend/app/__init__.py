@@ -1,8 +1,13 @@
+from multiprocessing.dummy.connection import Connection
+import os
+from app.dataaccess import Connection, DataAccess
 from flask import Flask
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
 
-db = SQLAlchemy()
+
+#DB connect
+db_conn = Connection()
+db = DataAccess(db_conn)
 
 def create_app():
 
@@ -11,6 +16,7 @@ def create_app():
 
     #Allow all origins
     CORS(app)
+
 
     # Register blueprints
     from app.routes import api
