@@ -1,9 +1,5 @@
-export default function StepIndicator({ currentStep }) {
-  const steps = [
-    { num: 1, label: 'Basic Info' },
-    { num: 2, label: 'Resume Details' },
-    { num: 3, label: 'Review' },
-  ]
+export default function StepIndicator({ currentStep, labels = ['Basic Info', 'Resume Details', 'Review'] }) {
+  const steps = labels.map((label, i) => ({ num: i + 1, label }))
 
   return (
     <div className="step-indicator">
