@@ -868,7 +868,7 @@ class EnumGetter:
     A class that returns all unique values of enum-type variables. This includes fields with predefined values, fields with user-defined values,
     and fields where integers correspond to certain ordinal concepts.<br>  
     For fields with user-defined values, all unique values are returned from the connected Typesense instance, within the context of certain collections.<br>  
-    This class is specifically designed to provide the backend and frontend with unique values for the fields `education` / `required_education`, `field_of_study`,
+    This class is specifically designed to provide the backend and frontend with unique values for the fields `education` / `required_education`, `work_mode`, `field_of_study`,
     `skills` / `required_skills`, `preferred_city` / `city`, `preferred_state` / `state`, and `preferred_country` / `country` involved in the intelligent job-matching platform.
     This primarily serves two purposes:  
     * Get values to be included in the filter options for each attribute for a given workflow (seeker or company) during a search operation,
@@ -890,7 +890,9 @@ class EnumGetter:
         r"""
         Maps an integer to its corresponding education level. Required for the ordinal categorical attribute `education` / `required_education`.<br>  
         Returns a string describing the education level according to the integer provided by `education_index`. `education_index` ranges from
-        1 to 10, any other integer will result in a KeyError.
+        1 to 10, any other integer will result in a KeyError.<br>  
+        This is primarily used for mapping **education level integers** <u>returned from Typesense</u> to **education level names**
+        for <u>display on the frontend</u>.
 
         ## Args
             **education_index**: *int*
@@ -915,7 +917,9 @@ class EnumGetter:
         r"""
         Maps an education level name to its corresponding integer. Required for the ordinal categorical attribute `education` / `required_education`.<br>  
         Returns an integer according to the the education level name provided by `education_name`. `education_name` covers ten different levels of education,
-        see the "Args" section for more detail. Any other education level name will result in a KeyError.
+        see the "Args" section for more detail. Any other education level name will result in a KeyError.<br>  
+        This is primarily used for mapping **education level names** <u>returned from the frontend</u> to **education level integers**
+        for <u>querying Typesense collections</u>.
 
         ## Args
             **education_name**: *str*
@@ -946,6 +950,20 @@ class EnumGetter:
         }
         return education_levels[education_name]
     
+    def get_education_levels(self) -> list[str]:
+        r"""
+        Returns a list of all education levels by name used by the intelligent job-matching platform,
+        primarily for display purposes for selections on the frontend.
+        """
+        return ["None", "Secondary", "Certificate I-II", "Certificate III-IV", "Diploma", "Advanced Diploma / Associate Degree",
+                "Bachelor", "Bachelor Honours / Graduate Certificate / Graduate Diploma", "Master", "PhD / Doctoral"]
+    
+    def get_work_modes(self) -> list[str]:
+        r"""
+        Returns the list of all work modes supported by the intelligent job-matching platform.
+        """
+        return ["On-site", "Remote", "Hybrid"]
+
     def get_fields_of_study(self) -> list[str]:
         r"""
         Returns the list of all predefined fields of study used by the intelligent job-matching platform.
