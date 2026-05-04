@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
-load_dotenv("../backend/app/.env")
+load_dotenv("../backend/.env")
 TYPESENSE_API_KEY = os.environ.get("TYPESENSE_API_KEY")
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
