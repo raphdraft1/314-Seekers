@@ -5,8 +5,8 @@ import RegisterStep2 from './pages/RegisterStep2'
 import RegisterStep3 from './pages/RegisterStep3'
 import EmployerStep2 from './pages/EmployerStep2'
 import EmployerStep3 from './pages/EmployerStep3'
-import HealthCheck from './test.jsx'
 import Resume from './pages/Resume'
+import HealthCheck from './test.jsx'
 
 function App() {
   return (
@@ -24,6 +24,9 @@ function App() {
       {/* Employer flow */}
       <Route path="/register/employer/step2" element={<EmployerStep2 />} />
       <Route path="/register/employer/step3" element={<EmployerStep3 />} />
+
+      {/* Resume page */}
+      <Route path="/resume" element={<Resume />} />
 
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
