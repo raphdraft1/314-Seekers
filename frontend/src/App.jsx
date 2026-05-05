@@ -6,6 +6,7 @@ import RegisterStep3 from './pages/RegisterStep3'
 import EmployerStep2 from './pages/EmployerStep2'
 import EmployerStep3 from './pages/EmployerStep3'
 import HealthCheck from './test.jsx'
+import Resume from './pages/Resume'
 
 function App() {
   return (

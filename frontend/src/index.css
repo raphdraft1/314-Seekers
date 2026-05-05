@@ -366,3 +366,224 @@ p { margin: 0; }
   line-height: 1.6;
   margin: 0;
 }
+
+/* ─── API ERROR MESSAGE ───────────────────────────────────────── */
+.api-error {
+  background: #fef2f2;
+  border: 1.5px solid #fecaca;
+  color: #dc2626;
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ─── DISABLED BUTTON ─────────────────────────────────────────── */
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ─── DASHBOARD NAVBAR ────────────────────────────────────────── */
+.dashnav {
+  background: #1e1b2e;
+  flex-shrink: 0;
+}
+.dashnav-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 60px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.dashnav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dashnav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dashnav-btn {
+  padding: 7px 18px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(255,255,255,0.2);
+  background: transparent;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: background 0.18s, border-color 0.18s;
+}
+.dashnav-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.4); }
+.dashnav-btn-outline {
+  border-color: var(--accent);
+  color: #c4b5fd;
+}
+.dashnav-btn-outline:hover { background: rgba(124,58,237,0.15); }
+.dashnav-tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 32px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.dashnav-tab {
+  padding: 12px 28px;
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font);
+  border-bottom: 2px solid transparent;
+  transition: color 0.18s, border-color 0.18s;
+  margin-bottom: -1px;
+}
+.dashnav-tab:hover { color: #fff; }
+.dashnav-tab.active { color: #fff; border-bottom-color: var(--accent); }
+
+/* ─── RESUME PAGE ─────────────────────────────────────────────── */
+.resume-page {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 40px 24px 72px;
+}
+.resume-card {
+  background: var(--surface);
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  width: 100%;
+  max-width: 780px;
+  overflow: hidden;
+}
+.resume-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-h);
+  text-align: center;
+  padding: 32px 40px 8px;
+  margin: 0;
+}
+.resume-ids {
+  display: flex;
+  gap: 20px;
+  justify-content: flex-start;
+  padding: 0 40px 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+/* ─── RESUME SECTIONS ─────────────────────────────────────────── */
+.resume-section {
+  border-bottom: 1px solid var(--border);
+  overflow: visible;
+}
+.resume-section-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 40px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-h);
+  text-align: left;
+  font-family: var(--font);
+  transition: background 0.15s;
+}
+.resume-section-header:hover { background: #f9fafb; }
+.resume-section.open .resume-section-header { color: var(--accent); }
+.resume-section-body {
+  padding: 8px 40px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow: visible;
+}
+
+/* ─── UPDATE ROW (field + update button side by side) ─────────── */
+.update-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  overflow: visible;
+}
+.update-row .field-group { flex: 1; }
+.update-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  padding-top: 22px;
+  flex-shrink: 0;
+}
+.btn-update {
+  padding: 8px 20px;
+  background: #1e1b2e;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font);
+  white-space: nowrap;
+  transition: background 0.18s;
+}
+.btn-update:hover { background: var(--accent); }
+.btn-update:disabled { opacity: 0.6; cursor: not-allowed; }
+.save-indicator {
+  font-size: 12px;
+  color: #16a34a;
+  font-weight: 600;
+}
+
+/* ─── TAG INPUT ───────────────────────────────────────────────── */
+.tag-input-wrap { display: flex; flex-direction: column; gap: 4px; }
+.tag-input-box {
+  min-height: 44px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  background: #fafafa;
+  cursor: text;
+  transition: border-color 0.18s;
+}
+.tag-input-box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+.tag-input-inner {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  font-family: var(--font);
+  min-width: 140px;
+  flex: 1;
+  color: var(--text-h);
+}
+.field-hint { font-size: 11px; color: var(--text-muted); margin: 0; }
+
+/* ─── RESUME FOOTER ───────────────────────────────────────────── */
+.resume-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 40px;
+  border-top: 1px solid var(--border);
+  background: #f9fafb;
+}
