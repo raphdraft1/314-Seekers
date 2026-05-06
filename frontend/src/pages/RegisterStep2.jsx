@@ -13,7 +13,7 @@ const SECTIONS = [
 
 function AccordionSection({ label, isOpen, onToggle, children }) {
   return (
-    <div className={`accordion ${isOpen ? 'open' : ''}`}>
+    <div className={`accordion ${isOpen ? 'open' : ''}`} style={{ overflow: isOpen ? 'visible' : 'hidden' }}>
       <button className="accordion-header" onClick={onToggle}>
         <span>{label}</span>
         <span className={`accordion-arrow ${isOpen ? 'up' : ''}`}>▼</span>
@@ -23,7 +23,6 @@ function AccordionSection({ label, isOpen, onToggle, children }) {
   )
 }
 
-// Field of Study multi-select component
 const FIELDS_OF_STUDY = [
   'Computer Science', 'Data Science', 'Artificial Intelligence',
   'Software Engineering', 'Information Technology', 'Cybersecurity',
@@ -37,10 +36,44 @@ const EDU_LEVELS = [
   '7 - Bachelor', '8 - Honours', '9 - Master', '10 - Doctorate / PhD',
 ]
 
+const WORK_MODES = ['On-site', 'Remote', 'Hybrid']
+
+function MultiSelectDropdown({ options, selected, onToggle }) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <div className="multiselect">
+      <div className="multiselect-tags" onClick={() => setOpen(!open)}>
+        {selected.length === 0 && <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Select options</span>}
+        {selected.map(f => (
+          <span key={f} className="tag">
+            {f}
+            <button className="tag-remove" onClick={e => { e.stopPropagation(); onToggle(f) }}>×</button>
+          </span>
+        ))}
+        <span className="multiselect-arrow">▼</span>
+      </div>
+      {open && (
+        <div className="multiselect-dropdown">
+          {options.map(f => (
+            <label key={f} className="dropdown-option">
+              <input
+                type="checkbox"
+                checked={selected.includes(f)}
+                onChange={() => onToggle(f)}
+              />
+              {f}
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function EducationSection() {
   const [eduLevel, setEduLevel] = useState('7 - Bachelor')
-  const [selectedFields, setSelectedFields] = useState(['Computer Science', 'Data Science', 'Artificial Intelligence'])
-  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [selectedFields, setSelectedFields] = useState([])
 
   const toggleField = (field) => {
     setSelectedFields(prev =>
@@ -65,31 +98,11 @@ function EducationSection() {
           Field of Study <span className="field-note">(Select one or more)</span> <span className="required">*</span>
           <span className="info-icon" title="Select your area(s) of study">ⓘ</span>
         </label>
-        <div className="multiselect">
-          <div className="multiselect-tags" onClick={() => setDropdownOpen(!dropdownOpen)}>
-            {selectedFields.map(f => (
-              <span key={f} className="tag">
-                {f}
-                <button className="tag-remove" onClick={e => { e.stopPropagation(); toggleField(f) }}>×</button>
-              </span>
-            ))}
-            <span className="multiselect-arrow">▼</span>
-          </div>
-          {dropdownOpen && (
-            <div className="multiselect-dropdown">
-              {FIELDS_OF_STUDY.map(f => (
-                <label key={f} className="dropdown-option">
-                  <input
-                    type="checkbox"
-                    checked={selectedFields.includes(f)}
-                    onChange={() => toggleField(f)}
-                  />
-                  {f}
-                </label>
-              ))}
-            </div>
-          )}
-        </div>
+        <MultiSelectDropdown
+          options={FIELDS_OF_STUDY}
+          selected={selectedFields}
+          onToggle={toggleField}
+        />
       </div>
     </div>
   )
@@ -181,6 +194,14 @@ function SkillsSection() {
 }
 
 function PreferencesSection() {
+  const [workModes, setWorkModes] = useState([])
+
+  const toggleMode = (mode) => {
+    setWorkModes(prev =>
+      prev.includes(mode) ? prev.filter(m => m !== mode) : [...prev, mode]
+    )
+  }
+
   return (
     <div className="section-content">
       <div className="field-group">
@@ -193,28 +214,31 @@ function PreferencesSection() {
           <option>Freelance</option>
         </select>
       </div>
+
       <div className="field-group">
-        <label className="field-label">Work Mode</label>
-        <select className="field-select">
-          <option>On-site</option>
-          <option>Remote</option>
-          <option>Hybrid</option>
-        </select>
+        <label className="field-label">
+          Work Mode <span className="field-note">(Select all that apply)</span>
+        </label>
+        <div className="checkbox-group">
+          {WORK_MODES.map(mode => (
+            <label key={mode} className="checkbox-option">
+              <input
+                type="checkbox"
+                checked={workModes.includes(mode)}
+                onChange={() => toggleMode(mode)}
+              />
+              <span>{mode}</span>
+            </label>
+          ))}
+        </div>
       </div>
+
       <div className="field-group">
         <label className="field-label">Expected Salary (Annual)</label>
         <input className="field-input" placeholder="e.g. $70,000" />
       </div>
     </div>
   )
-}
-
-const SECTION_CONTENT = {
-  personal: <PersonalSection />,
-  education: <EducationSection />,
-  experience: <ExperienceSection />,
-  skills: <SkillsSection />,
-  preferences: <PreferencesSection />,
 }
 
 export default function RegisterStep2() {
@@ -240,7 +264,11 @@ export default function RegisterStep2() {
                 isOpen={openSection === s.id}
                 onToggle={() => toggleSection(s.id)}
               >
-                {SECTION_CONTENT[s.id]}
+                {s.id === 'personal' && <PersonalSection />}
+                {s.id === 'education' && <EducationSection />}
+                {s.id === 'experience' && <ExperienceSection />}
+                {s.id === 'skills' && <SkillsSection />}
+                {s.id === 'preferences' && <PreferencesSection />}
               </AccordionSection>
             ))}
           </div>
