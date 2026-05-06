@@ -520,8 +520,8 @@ class DataAccess:
         r"""
         Find resumes relevant to the provided parameters. See the "Args" section for more detail.<br>  
         All fields listed in the "Args" section below are optional. Any parameters can be passed or left empty
-        to return relevant resumes. Searches done with some parameters left empty will return results based on parameters
-        provided in the method.<br>  
+        to return relevant resumes. Parameters left empty are **implicitly** set to <u>None</u>. Searches done with some parameters left empty 
+        or passed in as None will return results based on other non-None parameters provided in the method call.<br>  
         If **all fields are left empty**, the method returns **ALL** resumes from the "resumes" collection
         in the Typesense instance.<br>  
         Returns a **list[Resume]** object if resumes matching the search criteria are found, otherwise an empty list.<br>  
@@ -586,9 +586,9 @@ class DataAccess:
         r"""
         Find jobpostings relevant to the provided parameters. See the "Args" section for more detail.<br>  
         All fields listed in the "Args" section below are optional. Any parameters can be passed or left empty
-        to return relevant jobpostings. Searches done with some parameters left empty will return results based on parameters
-        provided in the method.<br>  
-        If **all fields are left empty**, the method returns **ALL** jobpostings from the "jobpostings" collection
+        to return relevant jobpostings. Parameters left empty are **implicitly** set to <u>None</u>. Searches done with some parameters left empty 
+        or passed in as None will return results based on other non-None parameters provided in the method call.<br>  
+        If **all fields are left empty** or passed in as None, the method returns **ALL** jobpostings from the "jobpostings" collection
         in the Typesense instance.<br>  
         Returns a **list[JobPosting]** object if jobpostings matching the search criteria are found, otherwise an empty list.<br>  
         Pagination is supported by this method.
