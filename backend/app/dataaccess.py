@@ -551,6 +551,10 @@ class DataAccess:
         ## Examples
             >>> db.query_resume()
         ... # Valid, returns the first 20 of ALL resumes found in Typesense
+        >>> db.query_resume(query_text=None, skills=None, education=None, 
+        ...                 exp_years=None, work_mode=None, field_of_study=None,
+        ...                 preferred_city=None, preferred_state=None, preferred_country=None)
+        ... # Valid, identical to the above
         >>> db.query_resume(page_number=2)
         ... # Valid, returns the next 20 of ALL resumes found in Typesense
         >>> db.query_resume(query_text="Optimis") 
@@ -560,7 +564,7 @@ class DataAccess:
         >>> db.query_resume(query_text="Optimis", page_number=2)
         ... # Valid, returns the next 20 resumes that contain the substring "Optimis"
         >>> db.query_resume(query_text="Optimis", skills=["Vue 3", "Django", "Python"], education=6, 
-        ... work_mode=["Remote", "Hybrid"], preferred_state="New South Wales")
+        ...                 work_mode=["Remote", "Hybrid"], preferred_state="New South Wales")
         ... # Valid, returns the first 20 resumes that match the above criteria
         """
         
@@ -617,6 +621,10 @@ class DataAccess:
         ## Examples
             >>> db.query_jobposting()
         ... # Valid, returns the first 20 of ALL jobpostings found in Typesense
+        >>> db.query_jobposting(self, query_text=None, required_skills=None, required_education=None, 
+        ...                     exp_years=None, work_mode=None, field_of_study=None,
+        ...                     city=None, state=None, country=None)
+        ... # Valid, identical to the above
         >>> db.query_jobposting(page_number=2)
         ... # Valid, returns the next 20 of ALL jobpostings found in Typesense
         >>> db.query_jobposting(query_text="Develop") 
@@ -626,7 +634,8 @@ class DataAccess:
         >>> db.query_jobposting(query_text="Develop", page_number=2)
         ... # Valid, returns the next 20 jobpostings that contain the substring "Develop"
         >>> db.query_jobposting(query_text="Develop", required_skills=["SQL Server", "MongoDB", "Redis"],  
-        ... required_education=5, work_mode=["Remote", "Hybrid", "On-site"], state="Australian Capital Territory")
+        ...                     required_education=5, work_mode=["Remote", "Hybrid", "On-site"], 
+        ...                     state="Australian Capital Territory")
         ... # Valid, returns the first 20 jobpostings that match the above criteria
         """
         
