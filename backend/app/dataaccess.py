@@ -900,7 +900,8 @@ class EnumGetter:
         Maps an integer to its corresponding education level. Required for the ordinal categorical attribute `education` / `required_education`.<br>  
         Returns a string describing the education level according to the integer provided by `education_index`. `education_index` ranges from
         1 to 10, any other integer will result in a KeyError.<br>  
-        This can be used wherever a mapping from **education level integers** to **education level names** is required.
+        This can be used wherever a mapping from **education level integers** to **education level names** is required, such as
+        for converting education fields of <u>returned Typesense documents</u> to names for <u>display on the frontend</u>.
 
         ## Args
             **education_index**: *int*
@@ -927,7 +928,7 @@ class EnumGetter:
         Returns an integer according to the the education level name provided by `education_name`. `education_name` covers ten different levels of education,
         see the "Args" section for more detail. Any other education level name will result in a KeyError.<br>  
         This can be used wherever a mapping from **education level names** to **education level integers** is required, such as
-        for <u>querying Typesense collections</u>.
+        when <u>querying Typesense collections</u>.
 
         ## Args
             **education_name**: *str*
