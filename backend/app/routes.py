@@ -111,7 +111,8 @@ def register_company():
 @api.route("/setup", methods=["GET", "OPTIONS"])
 def setup():
     return jsonify({"fields_of_study": db_EG.get_fields_of_study(), 
-                    "work_modes": db_EG.get_work_modes()})
+                    "work_modes": db_EG.get_work_modes(),
+                    "education_levels": db_EG.get_education_levels()})
 
 
 #Get resume data for seeker

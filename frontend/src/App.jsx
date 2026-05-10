@@ -12,20 +12,23 @@ import HealthCheck from './test.jsx'
 function App() {
   const [FIELDS_OF_STUDY, setFieldsOfStudy] = useState([])
   const [WORK_MODES, setWorkModes] = useState([])
+  const [EDUCATION_LEVELS, setEducationLevels] = useState([])
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
-  const EDUCATION_LEVELS = [
-    { value: 1,  label: 'None' },
-    { value: 2,  label: 'Secondary' },
-    { value: 3,  label: 'Certificate I-II' },
-    { value: 4,  label: 'Certificate III-IV' },
-    { value: 5,  label: 'Diploma' },
-    { value: 6,  label: 'Advanced Diploma / Associate Degree' },
-    { value: 7,  label: 'Bachelor' },
-    { value: 8,  label: 'Bachelor Honours / Graduate Certificate / Graduate Diploma' },
-    { value: 9,  label: 'Master' },
-    { value: 10, label: 'PhD / Doctoral' },
-  ]
+  // No need for this anymore, it's passed from the backend from now on,
+  // with exactly the same format as below.
+  // const EDUCATION_LEVELS = [
+  //   { value: 1,  label: 'None' },
+  //   { value: 2,  label: 'Secondary' },
+  //   { value: 3,  label: 'Certificate I-II' },
+  //   { value: 4,  label: 'Certificate III-IV' },
+  //   { value: 5,  label: 'Diploma' },
+  //   { value: 6,  label: 'Advanced Diploma / Associate Degree' },
+  //   { value: 7,  label: 'Bachelor' },
+  //   { value: 8,  label: 'Bachelor Honours / Graduate Certificate / Graduate Diploma' },
+  //   { value: 9,  label: 'Master' },
+  //   { value: 10, label: 'PhD / Doctoral' },
+  // ]
 
   useEffect(() => {
     
@@ -35,6 +38,10 @@ function App() {
         const data = await response.json()
         setFieldsOfStudy(data.fields_of_study)
         setWorkModes(data.work_modes)
+        setEducationLevels(Object.entries(data.education_levels).map(([key, value]) => ({
+          value: Number(key),
+          label: value,
+        })));
       } catch (error) {
         console.error('Error fetching setup:', error)
       }
@@ -45,6 +52,7 @@ function App() {
 
   console.log('FIELDS_OF_STUDY:', FIELDS_OF_STUDY)
   console.log('WORK_MODES:', WORK_MODES)
+  console.log('EDUCATION_LEVELS', EDUCATION_LEVELS)
 
   return (
     <Routes>
