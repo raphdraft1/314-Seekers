@@ -34,7 +34,7 @@ class Company:
         return f"<Company ({self.id})>"
 
 class Resume:
-    def __init__(self, seeker_id: str, education: int, experience: str, skills: list[str], exp_years: int, work_mode: list[str], field_of_study: list[str], preferred_city: str, preferred_state: str, preferred_country: str, resume_embedding: list[float], id=None):
+    def __init__(self, seeker_id: str, education: dict, experience: str, skills: list[str], exp_years: int, work_mode: list[str], field_of_study: list[str], preferred_city: str, preferred_state: str, preferred_country: str, resume_embedding: list[float], id=None):
         self.id = id
         self.seeker_id = seeker_id
         self.education = education
@@ -52,7 +52,7 @@ class Resume:
         return f"<Resume ({self.id})>"
 
 class JobPosting:
-    def __init__(self, company_id: str, title: str, summary: str, responsibilities: str, required_education: int, required_skills: list[str], exp_years: int, work_mode: list[str], field_of_study: list[str], city: str, state: str, country: str, jobposting_embedding: list[float], id=None):
+    def __init__(self, company_id: str, title: str, summary: str, responsibilities: str, required_education: dict, required_skills: list[str], exp_years: int, work_mode: list[str], field_of_study: list[str], city: str, state: str, country: str, jobposting_embedding: list[float], id=None):
         self.id = id
         self.company_id = company_id
         self.title = title

@@ -409,7 +409,7 @@ class DataAccess:
         """
         try:
             result = self.client.collections["resumes"].documents[f"{resume_id}"].retrieve({"include_fields": "$seekers(full_name, email)"})
-            resume = Resume(id=result["id"], seeker_id=result["seeker_id"], education=result["education"],
+            resume = Resume(id=result["id"], seeker_id=result["seeker_id"], education={result["education"]: self._map_int_to_education(result["education"])},
                             experience=result["experience"], skills=result["skills"], exp_years=result["exp_years"],
                             work_mode=result["work_mode"], field_of_study=result["field_of_study"], 
                             preferred_city=result["preferred_city"], preferred_state=result["preferred_state"], 
@@ -438,7 +438,8 @@ class DataAccess:
             result = self.client.collections["jobpostings"].documents[f"{jobposting_id}"].retrieve({"include_fields": "$companies(company_name, email)"})
             jobposting = JobPosting(id=result["id"], company_id=result["company_id"], title=result["title"],
                                 summary=result["summary"], responsibilities=result["responsibilities"],
-                                required_education=result["required_education"], required_skills=result["required_skills"], 
+                                required_education={result["required_education"]: self._map_int_to_education(result["required_education"])}, 
+                                required_skills=result["required_skills"], 
                                 exp_years=result["exp_years"], work_mode=result["work_mode"], field_of_study=result["field_of_study"], 
                                 city=result["city"], state=result["state"], country=result["country"], jobposting_embedding=result["jobposting_embedding"])
             jobposting.company_name = result["companies"]["company_name"]
