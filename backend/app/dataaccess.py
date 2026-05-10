@@ -900,8 +900,7 @@ class EnumGetter:
         Maps an integer to its corresponding education level. Required for the ordinal categorical attribute `education` / `required_education`.<br>  
         Returns a string describing the education level according to the integer provided by `education_index`. `education_index` ranges from
         1 to 10, any other integer will result in a KeyError.<br>  
-        This is primarily used for mapping **education level integers** <u>returned from Typesense</u> to **education level names**
-        for <u>display on the frontend</u>.
+        This can be used wherever a mapping from **education level integers** to **education level names** is required.
 
         ## Args
             **education_index**: *int*
@@ -927,7 +926,7 @@ class EnumGetter:
         Maps an education level name to its corresponding integer. Required for the ordinal categorical attribute `education` / `required_education`.<br>  
         Returns an integer according to the the education level name provided by `education_name`. `education_name` covers ten different levels of education,
         see the "Args" section for more detail. Any other education level name will result in a KeyError.<br>  
-        This is primarily used for mapping **education level names** <u>returned from the frontend</u> to **education level integers**
+        This can be used wherever a mapping from **education level names** to **education level integers** is required, such as
         for <u>querying Typesense collections</u>.
 
         ## Args
@@ -959,13 +958,23 @@ class EnumGetter:
         }
         return education_levels[education_name]
     
-    def get_education_levels(self) -> list[str]:
+    def get_education_levels(self) -> dict:
         r"""
-        Returns a list of all education levels by name used by the intelligent job-matching platform,
+        Returns a dictionary of all education levels by integer and name used by the intelligent job-matching platform,
         primarily for display purposes for selections on the frontend.
         """
-        return ["None", "Secondary", "Certificate I-II", "Certificate III-IV", "Diploma", "Advanced Diploma / Associate Degree",
-                "Bachelor", "Bachelor Honours / Graduate Certificate / Graduate Diploma", "Master", "PhD / Doctoral"]
+        return {
+            1: "None", 
+            2: "Secondary", 
+            3: "Certificate I-II", 
+            4: "Certificate III-IV", 
+            5: "Diploma", 
+            6: "Advanced Diploma / Associate Degree",
+            7: "Bachelor", 
+            8: "Bachelor Honours / Graduate Certificate / Graduate Diploma", 
+            9: "Master", 
+            10: "PhD / Doctoral"
+        }
     
     def get_work_modes(self) -> list[str]:
         r"""
