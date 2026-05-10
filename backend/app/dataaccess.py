@@ -827,7 +827,8 @@ class DataAccess:
         resume_list = []
         for resume_data in json_response["hits"]:
             resume_data = resume_data["document"]
-            resume_to_append = Resume(id=resume_data["id"], seeker_id=resume_data["seeker_id"], education=resume_data["education"],
+            resume_to_append = Resume(id=resume_data["id"], seeker_id=resume_data["seeker_id"],
+                                        education={resume_data["education"]: self._map_int_to_education(resume_data["education"])},
                                         experience=resume_data["experience"], skills=resume_data["skills"], exp_years=resume_data["exp_years"],
                                         work_mode=resume_data["work_mode"], field_of_study=resume_data["field_of_study"], 
                                         preferred_city=resume_data["preferred_city"], preferred_state=resume_data["preferred_state"], 
@@ -861,7 +862,8 @@ class DataAccess:
             jobposting_data = jobposting_data["document"]
             jobposting_to_append = JobPosting(id=jobposting_data["id"], company_id=jobposting_data["company_id"], title=jobposting_data["title"],
                                               summary=jobposting_data["summary"], responsibilities=jobposting_data["responsibilities"],
-                                              required_education=jobposting_data["required_education"], required_skills=jobposting_data["required_skills"], 
+                                              required_education={jobposting_data["required_education"]: self._map_int_to_education(jobposting_data["required_education"])}, 
+                                              required_skills=jobposting_data["required_skills"], 
                                               exp_years=jobposting_data["exp_years"], work_mode=jobposting_data["work_mode"], 
                                               field_of_study=jobposting_data["field_of_study"], city=jobposting_data["city"], state=jobposting_data["state"], 
                                               country=jobposting_data["country"], jobposting_embedding=jobposting_data["jobposting_embedding"])
@@ -870,34 +872,10 @@ class DataAccess:
             jobposting_list.append(jobposting_to_append)
 
         return jobposting_list
-
-
-class EnumGetter:
-    r"""
-    A class that returns all unique values of enum-type variables. This includes fields with predefined values, fields with user-defined values,
-    and fields where integers correspond to certain ordinal concepts.<br>  
-    For fields with user-defined values, all unique values are returned from the connected Typesense instance, within the context of certain collections.<br>  
-    This class is specifically designed to provide the backend and frontend with unique values for the fields `education` / `required_education`, `work_mode`, `field_of_study`,
-    `skills` / `required_skills`, `preferred_city` / `city`, `preferred_state` / `state`, and `preferred_country` / `country` involved in the intelligent job-matching platform.
-    This primarily serves two purposes:  
-    * Get values to be included in the filter options for each attribute for a given workflow (seeker or company) during a search operation,
-    * Get values to offer as selections for some fields to the user during account and resume / jobposting creation.
-
     
-    ## Args  
-        **client**: *Connection*  
-        An initialised Connection object connected to a Typesense instance. 
-
-    ## Examples
-        >>> connection = Connection()
-    >>> eg = EnumGetter(connection)
-    """
-    def __init__(self, connection: Connection):
-        self.client = connection.client
-    
-    def map_int_to_education(self, education_index: int) -> str:
+    def _map_int_to_education(self, education_index: int) -> str:
         r"""
-        Maps an integer to its corresponding education level. Required for the ordinal categorical attribute `education` / `required_education`.<br>  
+        For internal use only. Maps an integer to its corresponding education level. Required for the ordinal categorical attribute `education` / `required_education`.<br>  
         Returns a string describing the education level according to the integer provided by `education_index`. `education_index` ranges from
         1 to 10, any other integer will result in a KeyError.<br>  
         This can be used wherever a mapping from **education level integers** to **education level names** is required, such as
@@ -922,9 +900,9 @@ class EnumGetter:
         }
         return education_levels[education_index]
     
-    def map_education_to_int(self, education_name: str) -> int:
+    def _map_education_to_int(self, education_name: str) -> int:
         r"""
-        Maps an education level name to its corresponding integer. Required for the ordinal categorical attribute `education` / `required_education`.<br>  
+        For internal use only. Maps an education level name to its corresponding integer. Required for the ordinal categorical attribute `education` / `required_education`.<br>  
         Returns an integer according to the the education level name provided by `education_name`. `education_name` covers ten different levels of education,
         see the "Args" section for more detail. Any other education level name will result in a KeyError.<br>  
         This can be used wherever a mapping from **education level names** to **education level integers** is required, such as
@@ -958,6 +936,30 @@ class EnumGetter:
             "PhD / Doctoral": 10
         }
         return education_levels[education_name]
+
+
+class EnumGetter:
+    r"""
+    A class that returns all unique values of enum-type variables. This includes fields with predefined values, fields with user-defined values,
+    and fields where integers correspond to certain ordinal concepts.<br>  
+    For fields with user-defined values, all unique values are returned from the connected Typesense instance, within the context of certain collections.<br>  
+    This class is specifically designed to provide the backend and frontend with unique values for the fields `education` / `required_education`, `work_mode`, `field_of_study`,
+    `skills` / `required_skills`, `preferred_city` / `city`, `preferred_state` / `state`, and `preferred_country` / `country` involved in the intelligent job-matching platform.
+    This primarily serves two purposes:  
+    * Get values to be included in the filter options for each attribute for a given workflow (seeker or company) during a search operation,
+    * Get values to offer as selections for some fields to the user during account and resume / jobposting creation.
+
+    
+    ## Args  
+        **client**: *Connection*  
+        An initialised Connection object connected to a Typesense instance. 
+
+    ## Examples
+        >>> connection = Connection()
+    >>> eg = EnumGetter(connection)
+    """
+    def __init__(self, connection: Connection):
+        self.client = connection.client
     
     def get_education_levels(self) -> dict:
         r"""
