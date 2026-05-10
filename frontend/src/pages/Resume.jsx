@@ -2,30 +2,6 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import DashNav from '../components/DashNav'
 
-// ─── CONSTANTS (from data spec) ───────────────────────────────
-const EDUCATION_LEVELS = [
-  { value: 1,  label: 'None' },
-  { value: 2,  label: 'Secondary' },
-  { value: 3,  label: 'Certificate I-II' },
-  { value: 4,  label: 'Certificate III-IV' },
-  { value: 5,  label: 'Diploma' },
-  { value: 6,  label: 'Advanced Diploma / Associate Degree' },
-  { value: 7,  label: 'Bachelor' },
-  { value: 8,  label: 'Bachelor Honours / Graduate Certificate / Graduate Diploma' },
-  { value: 9,  label: 'Master' },
-  { value: 10, label: 'PhD / Doctoral' },
-]
-
-const FIELDS_OF_STUDY = [
-  'Computer Science', 'Artificial Intelligence', 'Computer Vision', 'Robotics',
-  'Software Engineering', 'Data Analytics', 'Machine Learning', 'Deep Learning',
-  'Web Development', 'Mobile Development', 'UI/UX', 'Cloud Computing',
-  'Cluster Computing', 'Database Management', 'Computer Networking',
-  'Operating Systems', 'Cybersecurity', 'Logging and Monitoring',
-]
-
-const WORK_MODES = ['Remote', 'On-site', 'Hybrid']
-
 // ─── PLACEHOLDER DATA (remove once backend GET endpoints are ready) ──
 const PLACEHOLDER_SEEKER = {
   seekerId:  '00000',
@@ -162,7 +138,7 @@ function FieldSelect({ options, selected, onChange }) {
 }
 
 // ─── MAIN PAGE ────────────────────────────────────────────────
-export default function Resume() {
+export default function Resume( FIELDS_OF_STUDY = [], WORK_MODES = [], EDUCATION_LEVELS = [], API_BASE_URL ) {
   const navigate = useNavigate()
   const [openSection, setOpenSection] = useState('personal')
   const [saving, setSaving] = useState({})
@@ -177,6 +153,55 @@ export default function Resume() {
   const [originalResume, setOriginalResume] = useState(PLACEHOLDER_RESUME)
 
   useEffect(() => {
+
+    // //Get seeker data
+    // response = await fetch(`${API_BASE_URL}/getSeeker`, { method: 'POST', credentials: 'include' })
+    //   if (response.ok) {
+    //     const data = await response.json()
+    //     const seekerData = data.seeker
+    //     const mapped = {
+    //     seekerId:  seekerData.id,
+    //     fullName:  seekerData.full_name,
+    //     email:     seekerData.email,
+    //     age:       seekerData.age,
+    //     city:      seekerData.city,
+    //     state:     seekerData.state,
+    //     country:   seekerData.country,
+    //     shortDesc: seekerData.short_desc,
+    //     bio:       seekerData.bio,
+    //   }
+    //   console.log(mapped)
+
+    //   setSeeker(mapped)
+    //   setOriginalSeeker(mapped)
+    // }
+
+    
+    // //Get resume data
+    // const response = await fetch(`${API_BASE_URL}/resume`, {
+    //   credentials: 'include'
+    // })
+    // if (!response.ok) {
+    //   const resumeData = await resumeRes.json()
+    //   const mappedResume = {
+    //     resumeId:         resumeData.id,
+    //     education:        resumeData.education,
+    //     institution:      resumeData.institution || '',
+    //     fieldOfStudy:     resumeData.field_of_study || [],
+    //     skills:           resumeData.skills || [],
+    //     expYears:         resumeData.exp_years,
+    //     experience:       resumeData.experience,
+    //     workModes:        resumeData.work_mode || [],
+    //     preferredCity:    resumeData.preferred_city,
+    //     preferredState:   resumeData.preferred_state,
+    //     preferredCountry: resumeData.preferred_country,
+    //   }
+    //   console.log(mappedResume)
+    //   setResume(mappedResume)
+    //   setOriginalResume(mappedResume)
+    // }
+  }, [])
+    //DONE above
     // ── TODO: Replace this block with real API calls once backend adds GET endpoints ──
     //
     // const seekerId = sessionStorage.getItem('user_id')
@@ -186,19 +211,7 @@ export default function Resume() {
     //   credentials: 'include'
     // })
     // const seekerData = await seekerRes.json()
-    // const mapped = {
-    //   seekerId:  seekerData.id,
-    //   fullName:  seekerData.full_name,
-    //   email:     seekerData.email,
-    //   age:       seekerData.age,
-    //   city:      seekerData.city,
-    //   state:     seekerData.state,
-    //   country:   seekerData.country,
-    //   shortDesc: seekerData.short_desc,
-    //   bio:       seekerData.bio,
-    // }
-    // setSeeker(mapped)
-    // setOriginalSeeker(mapped)
+    // 
     //
     // Step 2: Fetch resume
     // const resumeRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/seeker/me/resume`, {
@@ -221,7 +234,6 @@ export default function Resume() {
     // setResume(mappedResume)
     // setOriginalResume(mappedResume)
     // ── END TODO ──
-  }, [])
 
   const toggleSection = (id) => setOpenSection(prev => prev === id ? null : id)
 

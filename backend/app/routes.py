@@ -1,5 +1,5 @@
 import os
-from app import db
+from app import db_DA, db_EG
 from dotenv import load_dotenv
 from flask import Blueprint, jsonify, request, session
 
@@ -24,13 +24,13 @@ def login():
 
 
     #Check if the user is a seeker or company and return error if none
-    success = db.authenticate_seeker(email, password)
+    success = db_DA.authenticate_seeker(email, password)
     if success:
         session["user_id"] = success.id
         session["user_type"] = "seeker"
         return jsonify({"message": "Seeker login successful"}), 200
     else:
-        success = db.authenticate_company(email, password)
+        success = db_DA.authenticate_company(email, password)
 
     if success:
         session["user_id"] = success.id
@@ -40,7 +40,7 @@ def login():
         return jsonify({"error": "Invalid email or password"}), 401
 
 #Seeker registration
-api.route("/register/seeker", methods=["POST"])
+@api.route("/register/seeker", methods=["POST"])
 def register_seeker():
 
     #user variables
@@ -67,9 +67,9 @@ def register_seeker():
     preferred_country = data.get("preferred_country")
 
     #Create both seeker and resume if seeker is new
-    if db.create_seeker(name, email, age, city, state, country, short_desc, bio, password):
-        seekerId = db.get_seeker_by_identifier(email = email) 
-        db.create_resume(seekerId, education, experience, skills, exp_years, work_mode, field_of_study, preferred_city, preferred_state, preferred_country)
+    if db_DA.create_seeker(name, email, age, city, state, country, short_desc, bio, password):
+        seekerId = db_DA.get_seeker_by_identifier(email = email) 
+        db_DA.create_resume(seekerId, education, experience, skills, exp_years, work_mode, field_of_study, preferred_city, preferred_state, preferred_country)
 
         #Create sessdion cookies
         session["user_id"] = seekerId
@@ -80,7 +80,7 @@ def register_seeker():
         return jsonify({"error": "Account already exists"}), 400
     
 #Company registration
-api.route("/register/company", methods=["POST"])
+@api.route("/register/company", methods=["POST"])
 def register_company():
     #Company Var
     data = request.get_json()
@@ -97,11 +97,35 @@ def register_company():
     culture = data.get("culture")
 
     #Create company if company is new
-    if db.create_company(name, email, city, state, country, short_desc, bio, fYear, industry, culture, password):
-        company_id = db.get_company_by_identifier(email = email)
+    if db_DA.create_company(name, email, city, state, country, short_desc, bio, fYear, industry, culture, password):
+        company_id = db_DA.get_company_by_identifier(email = email)
         session["user_id"] = company_id
         session["user_type"] = "company"
 
         return jsonify({"result": "Company created successfully"}), 201
     else:
         return jsonify({"error": "Account already exists"}), 400
+    
+
+#Return fields of study options
+@api.route("/setup", methods=["GET", "OPTIONS"])
+def setup():
+    return jsonify({"fields_of_study": db_EG.get_fields_of_study(), 
+                    "work_modes": db_EG.get_work_modes()})
+
+
+#Get resume data for seeker
+@api.route("/resume", methods=["GET"])
+def get_resume():
+    resumes = db_DA.get_all_resumes_by_seeker_id(session["user_id"])
+
+    return jsonify({"resume": resumes[0] if resumes else None})
+
+#Get seeker data
+@api.route("/getSeeker", methods=["POST"])
+def get_seeker():
+    seeker = db_DA.get_seeker_by_id(session["user_id"])
+    if not seeker:
+        return jsonify({"error": "Seeker not found"}), 404
+
+    return jsonify({"seeker": seeker})

@@ -28,7 +28,7 @@ function Login({API_BASE_URL}) {
         const response = await fetch(`${API_BASE_URL}/login`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({email: form.email, password: form.password}) })
         
         //check if login successful and output messages
-        if (response.ok) {navigate('/dashboard') } //change to the dash page actual name. Can check employer or not and immediately redirect
+        if (response.ok) {navigate('/resume') } //change to the dash page actual name. Can check employer or not and immediately redirect
         else if (response.status === 401) alert("Invalid email or password")
         else alert("Server error. Please try again later.")
     }

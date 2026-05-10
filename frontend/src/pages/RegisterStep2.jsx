@@ -23,20 +23,12 @@ function AccordionSection({ label, isOpen, onToggle, children }) {
   )
 }
 
-const FIELDS_OF_STUDY = [
-  'Computer Science', 'Data Science', 'Artificial Intelligence',
-  'Software Engineering', 'Information Technology', 'Cybersecurity',
-  'Business', 'Marketing', 'Finance', 'Accounting', 'Economics',
-  'Psychology', 'Education', 'Healthcare', 'Law', 'Engineering',
-]
 
 const EDU_LEVELS = [
   '1 - No Formal Education', '2 - Primary School', '3 - Middle School',
   '4 - High School', '5 - Vocational / Certificate', '6 - Associate Degree',
   '7 - Bachelor', '8 - Honours', '9 - Master', '10 - Doctorate / PhD',
 ]
-
-const WORK_MODES = ['On-site', 'Remote', 'Hybrid']
 
 function MultiSelectDropdown({ options, selected, onToggle }) {
   const [open, setOpen] = useState(false)
@@ -71,7 +63,7 @@ function MultiSelectDropdown({ options, selected, onToggle }) {
   )
 }
 
-function EducationSection() {
+function EducationSection({ FIELDS_OF_STUDY = [] }) {
   const [eduLevel, setEduLevel] = useState('7 - Bachelor')
   const [selectedFields, setSelectedFields] = useState([])
 
@@ -193,7 +185,7 @@ function SkillsSection() {
   )
 }
 
-function PreferencesSection() {
+function PreferencesSection({ WORK_MODES = [] }) {
   const [workModes, setWorkModes] = useState([])
 
   const toggleMode = (mode) => {
@@ -241,7 +233,7 @@ function PreferencesSection() {
   )
 }
 
-export default function RegisterStep2() {
+export default function RegisterStep2({ FIELDS_OF_STUDY = [], WORK_MODES = [], EDUCATION_LEVELS = [] } = {}) {
   const navigate = useNavigate()
   const { role } = useParams()
   const [openSection, setOpenSection] = useState(null)
@@ -265,10 +257,10 @@ export default function RegisterStep2() {
                 onToggle={() => toggleSection(s.id)}
               >
                 {s.id === 'personal' && <PersonalSection />}
-                {s.id === 'education' && <EducationSection />}
+                {s.id === 'education' && <EducationSection FIELDS_OF_STUDY={FIELDS_OF_STUDY} />}
                 {s.id === 'experience' && <ExperienceSection />}
                 {s.id === 'skills' && <SkillsSection />}
-                {s.id === 'preferences' && <PreferencesSection />}
+                {s.id === 'preferences' && <PreferencesSection WORK_MODES={WORK_MODES} />}
               </AccordionSection>
             ))}
           </div>
