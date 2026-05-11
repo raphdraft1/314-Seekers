@@ -16,7 +16,7 @@ def create_app():
     app = Flask(__name__)
 
     #Allow all origins
-    CORS(app)
+    CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
 
 
     # Register blueprints

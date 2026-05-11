@@ -118,15 +118,44 @@ def setup():
 #Get resume data for seeker
 @api.route("/resume", methods=["GET"])
 def get_resume():
-    resumes = db_DA.get_all_resumes_by_seeker_id(session["user_id"])
+    resumes = db_DA.get_all_resumes_by_seeker(seeker_id=session["user_id"])
 
-    return jsonify({"resume": resumes[0] if resumes else None})
+    resumes_json = []
+    for resume in resumes:
+        resumes_json.append({
+            "id": resume.id,
+            "seeker_id": resume.seeker_id,
+            "education": resume.education,
+            "experience": resume.experience,
+            "skills": resume.skills,
+            "exp_years": resume.exp_years,
+            "work_mode": resume.work_mode,
+            "field_of_study": resume.field_of_study,
+            "preferred_city": resume.preferred_city,
+            "preferred_state": resume.preferred_state,
+            "preferred_country": resume.preferred_country
+        })
+
+    return jsonify({"resumes": resumes_json})
 
 #Get seeker data
 @api.route("/getSeeker", methods=["POST"])
 def get_seeker():
-    seeker = db_DA.get_seeker_by_id(session["user_id"])
+    seeker = db_DA.get_seeker_by_identifier(seeker_id=session["user_id"])
     if not seeker:
         return jsonify({"error": "Seeker not found"}), 404
 
-    return jsonify({"seeker": seeker})
+    seeker_json = {
+        "id": seeker.id,
+        "full_name": seeker.full_name,
+        "email": seeker.email,
+        "age": seeker.age,
+        "city": seeker.city,
+        "state": seeker.state,
+        "country": seeker.country,
+        "short_desc": seeker.short_desc,
+        "bio": seeker.bio,
+        "membership": seeker.membership
+    }
+
+    return jsonify({"seeker": seeker_json})
