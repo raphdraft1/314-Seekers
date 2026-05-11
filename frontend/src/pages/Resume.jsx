@@ -138,7 +138,7 @@ function FieldSelect({ options, selected, onChange }) {
 }
 
 // ─── MAIN PAGE ────────────────────────────────────────────────
-export default function Resume( FIELDS_OF_STUDY = [], WORK_MODES = [], EDUCATION_LEVELS = [], API_BASE_URL ) {
+export default function Resume( {FIELDS_OF_STUDY = [], WORK_MODES = [], EDUCATION_LEVELS = [], API_BASE_URL} ) {
   const navigate = useNavigate()
   const [openSection, setOpenSection] = useState('personal')
   const [saving, setSaving] = useState({})
@@ -153,53 +153,55 @@ export default function Resume( FIELDS_OF_STUDY = [], WORK_MODES = [], EDUCATION
   const [originalResume, setOriginalResume] = useState(PLACEHOLDER_RESUME)
 
   useEffect(() => {
+    const fetchData = async () => {
+      //Get seeker data
+      const seekerResponse = await fetch(`${API_BASE_URL}/getSeeker`, { method: 'POST', credentials: 'include' })
+        if (seekerResponse.ok) {
+          const data = await seekerResponse.json()
+          const seekerData = data.seeker
+          const mapped = {
+          seekerId:  seekerData.id,
+          fullName:  seekerData.full_name,
+          email:     seekerData.email,
+          age:       seekerData.age,
+          city:      seekerData.city,
+          state:     seekerData.state,
+          country:   seekerData.country,
+          shortDesc: seekerData.short_desc,
+          bio:       seekerData.bio,
+        }
+        console.log(mapped)
 
-    // //Get seeker data
-    // response = await fetch(`${API_BASE_URL}/getSeeker`, { method: 'POST', credentials: 'include' })
-    //   if (response.ok) {
-    //     const data = await response.json()
-    //     const seekerData = data.seeker
-    //     const mapped = {
-    //     seekerId:  seekerData.id,
-    //     fullName:  seekerData.full_name,
-    //     email:     seekerData.email,
-    //     age:       seekerData.age,
-    //     city:      seekerData.city,
-    //     state:     seekerData.state,
-    //     country:   seekerData.country,
-    //     shortDesc: seekerData.short_desc,
-    //     bio:       seekerData.bio,
-    //   }
-    //   console.log(mapped)
+        setSeeker(mapped)
+        setOriginalSeeker(mapped)
+      }
 
-    //   setSeeker(mapped)
-    //   setOriginalSeeker(mapped)
-    // }
-
-    
-    // //Get resume data
-    // const response = await fetch(`${API_BASE_URL}/resume`, {
-    //   credentials: 'include'
-    // })
-    // if (!response.ok) {
-    //   const resumeData = await resumeRes.json()
-    //   const mappedResume = {
-    //     resumeId:         resumeData.id,
-    //     education:        resumeData.education,
-    //     institution:      resumeData.institution || '',
-    //     fieldOfStudy:     resumeData.field_of_study || [],
-    //     skills:           resumeData.skills || [],
-    //     expYears:         resumeData.exp_years,
-    //     experience:       resumeData.experience,
-    //     workModes:        resumeData.work_mode || [],
-    //     preferredCity:    resumeData.preferred_city,
-    //     preferredState:   resumeData.preferred_state,
-    //     preferredCountry: resumeData.preferred_country,
-    //   }
-    //   console.log(mappedResume)
-    //   setResume(mappedResume)
-    //   setOriginalResume(mappedResume)
-    // }
+      //Get resume data
+      const resumeResponse = await fetch(`${API_BASE_URL}/resume`, {
+        credentials: 'include'
+      })
+      if (resumeResponse.ok) {
+        const data =  await resumeResponse.json()
+        const resumeData = data.resumes[0] // Frontend only supports one resume per seeker
+        const mappedResume = {
+          resumeId:         resumeData.id,
+          education:        resumeData.education,
+          institution:      resumeData.institution || '',
+          fieldOfStudy:     resumeData.field_of_study || [],
+          skills:           resumeData.skills || [],
+          expYears:         resumeData.exp_years,
+          experience:       resumeData.experience,
+          workModes:        resumeData.work_mode || [],
+          preferredCity:    resumeData.preferred_city,
+          preferredState:   resumeData.preferred_state,
+          preferredCountry: resumeData.preferred_country,
+        }
+        console.log(mappedResume)
+        setResume(mappedResume)
+        setOriginalResume(mappedResume)
+      }
+    }
+    fetchData()
   }, [])
     //DONE above
     // ── TODO: Replace this block with real API calls once backend adds GET endpoints ──
