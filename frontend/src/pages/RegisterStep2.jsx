@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate, useParams } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import StepIndicator from '../components/StepIndicator'
@@ -13,12 +14,12 @@ const SECTIONS = [
 
 function AccordionSection({ label, isOpen, onToggle, children }) {
   return (
-    <div className={`accordion ${isOpen ? 'open' : ''}`} style={{ overflow: isOpen ? 'visible' : 'hidden' }}>
+    <div className={`accordion ${isOpen ? 'open' : ''}`} style={{ overflow: 'visible' }}>
       <button className="accordion-header" onClick={onToggle}>
         <span>{label}</span>
         <span className={`accordion-arrow ${isOpen ? 'up' : ''}`}>▼</span>
       </button>
-      {isOpen && <div className="accordion-body">{children}</div>}
+      {isOpen && <div className="accordion-body" style={{ overflow: 'visible' }}>{children}</div>}
     </div>
   )
 }
@@ -32,9 +33,44 @@ const EDU_LEVELS = [
 
 function MultiSelectDropdown({ options, selected, onToggle }) {
   const [open, setOpen] = useState(false)
+  const [dropdownStyle, setDropdownStyle] = useState({})
+  const triggerRef = useRef(null)
+
+  // Calculate position of the dropdown relative to the trigger element
+  useEffect(() => {
+    if (open && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect()
+      setDropdownStyle({
+        position: 'fixed',
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+        zIndex: 9999,
+        background: '#fff',
+        border: '1.5px solid var(--border)',
+        borderRadius: 'var(--radius-sm)',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+        maxHeight: '210px',
+        overflowY: 'auto',
+        padding: '6px 0',
+      })
+    }
+  }, [open])
+
+  // Close when clicking outside
+  useEffect(() => {
+    if (!open) return
+    const handler = (e) => {
+      if (triggerRef.current && !triggerRef.current.contains(e.target)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
 
   return (
-    <div className="multiselect">
+    <div ref={triggerRef} className="multiselect" style={{ position: 'relative' }}>
       <div className="multiselect-tags" onClick={() => setOpen(!open)}>
         {selected.length === 0 && <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Select options</span>}
         {selected.map(f => (
@@ -45,8 +81,8 @@ function MultiSelectDropdown({ options, selected, onToggle }) {
         ))}
         <span className="multiselect-arrow">▼</span>
       </div>
-      {open && (
-        <div className="multiselect-dropdown">
+      {open && createPortal(
+        <div style={dropdownStyle}>
           {options.map(f => (
             <label key={f} className="dropdown-option">
               <input
@@ -57,7 +93,8 @@ function MultiSelectDropdown({ options, selected, onToggle }) {
               {f}
             </label>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

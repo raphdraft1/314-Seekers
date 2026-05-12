@@ -38,6 +38,12 @@ export default function AccountType() {
             <p className="account-card-desc">Find the best candidates</p>
           </button>
         </div>
+        <p className="form-footer" style={{ marginTop: 32 }}>
+          Already have an account?{' '}
+          <span className="form-link" style={{ cursor: 'pointer' }} onClick={() => navigate('/login')}>
+            Log in
+          </span>
+        </p>
       </div>
     </div>
   )

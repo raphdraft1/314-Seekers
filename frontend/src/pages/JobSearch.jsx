@@ -1,0 +1,223 @@
+import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
+import DashNav from '../components/DashNav'
+
+export default function JobSearch({ API_BASE_URL, EDUCATION_LEVELS = [], WORK_MODES = [] }) {
+  const navigate = useNavigate()
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [searched, setSearched] = useState(false)
+  const [filters, setFilters] = useState({
+    work_mode: [],
+    required_education: '',
+    exp_years: '',
+    city: '',
+    state: '',
+    country: '',
+  })
+  const [showFilters, setShowFilters] = useState(false)
+
+  const doSearch = async () => {
+    setLoading(true)
+    setSearched(true)
+    try {
+      const params = new URLSearchParams()
+      if (query.trim()) params.set('q', query.trim())
+      if (filters.work_mode.length) params.set('work_mode', filters.work_mode.join(','))
+      if (filters.required_education) params.set('required_education', filters.required_education)
+      if (filters.exp_years) params.set('exp_years', filters.exp_years)
+      if (filters.city) params.set('city', filters.city)
+      if (filters.state) params.set('state', filters.state)
+      if (filters.country) params.set('country', filters.country)
+
+      // TODO: Backend needs GET /search/jobs?q=...&work_mode=...&etc
+      const res = await fetch(`${API_BASE_URL}/search/jobs?${params}`, {
+        credentials: 'include',
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setResults(data.jobpostings || [])
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleKey = (e) => {
+    if (e.key === 'Enter') doSearch()
+  }
+
+  const clearFilters = () => {
+    setFilters({ work_mode: [], required_education: '', exp_years: '', city: '', state: '', country: '' })
+  }
+
+  const activeFilterCount = [
+    filters.work_mode.length > 0,
+    !!filters.required_education,
+    !!filters.exp_years,
+    !!filters.city || !!filters.state || !!filters.country,
+  ].filter(Boolean).length
+
+  return (
+    <div className="page">
+      <DashNav activePage="search" userType="seeker" />
+
+      <div className="search-page">
+        <div className="search-header">
+          <h1 className="search-title">Find Jobs</h1>
+          <p className="search-sub">Search thousands of job postings by keyword, location, and more.</p>
+
+          <div className="search-bar-row">
+            <div className="search-bar">
+              <svg className="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+              </svg>
+              <input
+                className="search-input"
+                placeholder="Job title, skills, keywords…"
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                onKeyDown={handleKey}
+              />
+              {query && (
+                <button className="search-clear" onClick={() => setQuery('')}>✕</button>
+              )}
+            </div>
+            <button className="btn-primary" onClick={doSearch}>Search</button>
+          </div>
+
+          <button
+            className="filter-toggle"
+            onClick={() => setShowFilters(f => !f)}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+            </svg>
+            Filters {activeFilterCount > 0 && <span className="filter-badge">{activeFilterCount}</span>}
+            <span style={{ marginLeft: 4 }}>{showFilters ? '▲' : '▼'}</span>
+          </button>
+        </div>
+
+        <div className="search-layout">
+          {/* Filters panel */}
+          {showFilters && (
+            <div className="filter-panel">
+              <div className="filter-panel-header">
+                <span className="filter-panel-title">Filters</span>
+                <button className="filter-clear-btn" onClick={clearFilters}>Clear all</button>
+              </div>
+
+              <FilterSection title="Work Mode">
+                {WORK_MODES.map(m => (
+                  <label key={m} className="checkbox-option">
+                    <input
+                      type="checkbox"
+                      checked={filters.work_mode.includes(m)}
+                      onChange={() => {
+                        const updated = filters.work_mode.includes(m)
+                          ? filters.work_mode.filter(x => x !== m)
+                          : [...filters.work_mode, m]
+                        setFilters(f => ({ ...f, work_mode: updated }))
+                      }}
+                    />
+                    <span>{m}</span>
+                  </label>
+                ))}
+              </FilterSection>
+
+              <FilterSection title="Minimum Education">
+                <select
+                  className="field-select"
+                  value={filters.required_education}
+                  onChange={e => setFilters(f => ({ ...f, required_education: e.target.value }))}
+                >
+                  <option value="">Any</option>
+                  {EDUCATION_LEVELS.map(l => (
+                    <option key={l.value} value={l.value}>{l.label}</option>
+                  ))}
+                </select>
+              </FilterSection>
+
+              <FilterSection title="Min. Years of Experience">
+                <input
+                  className="field-input"
+                  type="number"
+                  min="0"
+                  max="30"
+                  placeholder="e.g. 2"
+                  value={filters.exp_years}
+                  onChange={e => setFilters(f => ({ ...f, exp_years: e.target.value }))}
+                />
+              </FilterSection>
+
+              <FilterSection title="Location">
+                <input className="field-input" placeholder="City" value={filters.city} onChange={e => setFilters(f => ({ ...f, city: e.target.value }))} />
+                <input className="field-input" style={{ marginTop: 8 }} placeholder="State" value={filters.state} onChange={e => setFilters(f => ({ ...f, state: e.target.value }))} />
+                <input className="field-input" style={{ marginTop: 8 }} placeholder="Country" value={filters.country} onChange={e => setFilters(f => ({ ...f, country: e.target.value }))} />
+              </FilterSection>
+
+              <button className="btn-primary btn-wide" style={{ marginTop: 8 }} onClick={doSearch}>
+                Apply Filters
+              </button>
+            </div>
+          )}
+
+          {/* Results */}
+          <div className="search-results">
+            {loading ? (
+              <div className="search-state">
+                <div className="spinner" />
+                <p>Searching…</p>
+              </div>
+            ) : !searched ? (
+              <div className="search-state">
+                <p className="search-hint">Enter a keyword or use filters to find jobs.</p>
+              </div>
+            ) : results.length === 0 ? (
+              <div className="search-state">
+                <p className="search-hint">No results found. Try different keywords or broaden your filters.</p>
+              </div>
+            ) : (
+              <>
+                <p className="results-count">{results.length} result{results.length !== 1 ? 's' : ''}</p>
+                <div className="job-card-list">
+                  {results.map(job => (
+                    <div key={job.id} className="job-card" onClick={() => navigate(`/job/${job.id}`)}>
+                      <div className="job-card-main">
+                        <div className="job-card-title">{job.title}</div>
+                        <div className="job-card-company">{job.company_name}</div>
+                        <div className="job-card-meta">
+                          {job.city && <span>📍 {job.city}{job.state ? `, ${job.state}` : ''}</span>}
+                          {job.work_mode?.length > 0 && <span>🖥 {job.work_mode.join(' / ')}</span>}
+                          {job.exp_years != null && <span>⏱ {job.exp_years}+ yrs</span>}
+                        </div>
+                        {job.summary && <p className="job-card-summary">{job.summary.slice(0, 160)}…</p>}
+                        {job.required_skills?.length > 0 && (
+                          <div className="tags-row" style={{ marginTop: 8 }}>
+                            {job.required_skills.slice(0, 5).map(s => <span key={s} className="tag">{s}</span>)}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function FilterSection({ title, children }) {
+  return (
+    <div className="filter-section">
+      <p className="filter-section-title">{title}</p>
+      {children}
+    </div>
+  )
+}
