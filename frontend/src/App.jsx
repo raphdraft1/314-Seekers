@@ -23,6 +23,8 @@ import RecommendedCandidates from './pages/RecommendedCandidates'
 import JobPostingForm from './pages/JobPostingForm'
 import ManageJobs from './pages/ManageJobs'
 
+import JobDetail from './pages/JobDetail'
+
 // Dev
 import HealthCheck from './test.jsx'
 
@@ -60,23 +62,7 @@ function App() {
 
   // Redirect to correct dashboard / search / recommended based on user_type in sessionStorage
   // The login + registration flows must write sessionStorage.setItem('user_type', 'seeker'|'company')
-  const DashboardRedirect = () => {
-    const t = sessionStorage.getItem('user_type')
-    if (t === 'company') return <EmployerDashboard API_BASE_URL={API_BASE_URL} />
-    return <SeekerDashboard API_BASE_URL={API_BASE_URL} />
-  }
 
-  const SearchRedirect = () => {
-    const t = sessionStorage.getItem('user_type')
-    if (t === 'company') return <CandidateSearch {...enumProps} />
-    return <JobSearch {...enumProps} />
-  }
-
-  const RecommendedRedirect = () => {
-    const t = sessionStorage.getItem('user_type')
-    if (t === 'company') return <RecommendedCandidates API_BASE_URL={API_BASE_URL} />
-    return <RecommendedJobs API_BASE_URL={API_BASE_URL} />
-  }
 
   return (
     <Routes>
@@ -87,15 +73,15 @@ function App() {
       <Route path="/" element={<AccountType />} />
       <Route path="/login" element={<Login API_BASE_URL={API_BASE_URL} />} />
       <Route path="/register/:role/step1" element={<RegisterStep1 />} />
-      <Route path="/register/seeker/step2" element={<RegisterStep2 {...enumProps} />} />
-      <Route path="/register/seeker/step3" element={<RegisterStep3 />} />
       <Route path="/register/employer/step2" element={<EmployerStep2 />} />
       <Route path="/register/employer/step3" element={<EmployerStep3 />} />
+      <Route path="/register/:role/step2" element={<RegisterStep2 {...enumProps} />} />
+      <Route path="/register/:role/step3" element={<RegisterStep3 API_BASE_URL={API_BASE_URL} />} />
 
       {/* Shared — renders correct component based on sessionStorage user_type */}
-      <Route path="/dashboard"   element={<DashboardRedirect />} />
-      <Route path="/search"      element={<SearchRedirect />} />
-      <Route path="/recommended" element={<RecommendedRedirect />} />
+      <Route path="/dashboard"   element={sessionStorage.getItem('user_type') === 'company' ? <EmployerDashboard API_BASE_URL={API_BASE_URL} /> : <SeekerDashboard API_BASE_URL={API_BASE_URL} />} />
+      <Route path="/search"      element={sessionStorage.getItem('user_type') === 'company' ? <CandidateSearch {...enumProps} /> : <JobSearch {...enumProps} />} />
+      <Route path="/recommended" element={sessionStorage.getItem('user_type') === 'company' ? <RecommendedCandidates API_BASE_URL={API_BASE_URL} /> : <RecommendedJobs API_BASE_URL={API_BASE_URL} />} />
 
       {/* Seeker only */}
       <Route path="/resume" element={<Resume {...enumProps} />} />
@@ -104,6 +90,8 @@ function App() {
       <Route path="/jobs"             element={<ManageJobs API_BASE_URL={API_BASE_URL} />} />
       <Route path="/jobs/new"         element={<JobPostingForm {...enumProps} />} />
       <Route path="/jobs/:jobId/edit" element={<JobPostingForm {...enumProps} />} />
+
+      <Route path="/job/:jobId" element={<JobDetail API_BASE_URL={API_BASE_URL} />} />
 
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

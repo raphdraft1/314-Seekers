@@ -1,15 +1,63 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import StepIndicator from '../components/StepIndicator'
 
 export default function EmployerStep3() {
   const navigate = useNavigate()
+  const [loading, setLoading] = useState(false)
 
-  // Read data saved by Step 2
   const profile = JSON.parse(sessionStorage.getItem('employerProfile') || '{}')
-  const step1Email = sessionStorage.getItem('employerEmail') || '—'
+  const step1 = JSON.parse(sessionStorage.getItem('reg_step1') || '{}')
 
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
   const location = [profile.city, profile.state, profile.country].filter(Boolean).join(', ') || '—'
+
+  const handleRegister = async () => {
+    if (!step1.email || !step1.password) {
+      alert('Registration data is missing. Please start from Step 1.')
+      navigate('/register/employer/step1')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const response = await fetch(`${API_BASE_URL}/register/company`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: step1.email,
+          password: step1.password,
+          name: step1.fullName,
+          city: profile.city || '',
+          state: profile.state || '',
+          country: profile.country || '',
+          short_desc: profile.shortDescription || '',
+          bio: profile.bio || '',
+          fYear: profile.foundedYear ? parseInt(profile.foundedYear) : null,
+          industry: profile.industry || '',
+          culture: profile.culture || '',
+        }),
+      })
+
+      if (response.status === 201) {
+        sessionStorage.setItem('user_type', 'company')
+        sessionStorage.removeItem('reg_step1')
+        sessionStorage.removeItem('employerProfile')
+        navigate('/dashboard')
+      } else if (response.status === 400) {
+        alert('An account with this email already exists. Please log in.')
+        navigate('/login')
+      } else {
+        alert('Server error. Please try again later.')
+      }
+    } catch {
+      alert('Network error. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const ReviewRow = ({ label, value }) => (
     <div className="review-row">
@@ -35,7 +83,15 @@ export default function EmployerStep3() {
 
           <div className="review-body">
 
-            {/* Company Overview */}
+            <div className="review-section">
+              <div className="review-section-header">
+                <h3>Account</h3>
+                <button className="edit-link" onClick={() => navigate('/register/employer/step1')}>Edit</button>
+              </div>
+              <ReviewRow label="Name" value={step1.fullName} />
+              <ReviewRow label="Email" value={step1.email} />
+            </div>
+
             <div className="review-section">
               <div className="review-section-header">
                 <h3>Company Overview</h3>
@@ -49,7 +105,6 @@ export default function EmployerStep3() {
               <ReviewRow label="Location" value={location} />
             </div>
 
-            {/* Culture */}
             {profile.culture && (
               <div className="review-section">
                 <div className="review-section-header">
@@ -60,7 +115,6 @@ export default function EmployerStep3() {
               </div>
             )}
 
-            {/* Bio */}
             {profile.bio && (
               <div className="review-section">
                 <div className="review-section-header">
@@ -75,8 +129,8 @@ export default function EmployerStep3() {
               By creating an account you agree to our <a href="#" className="form-link">Terms of Service</a> and <a href="#" className="form-link">Privacy Policy</a>.
             </p>
 
-            <button className="btn-primary btn-wide" onClick={() => alert('Employer account created! (hook up to backend)')}>
-              Create Account
+            <button className="btn-primary btn-wide" onClick={handleRegister} disabled={loading}>
+              {loading ? 'Creating Account...' : 'Create Account'}
             </button>
 
             <div className="form-nav" style={{ marginTop: '12px' }}>

@@ -248,20 +248,38 @@ export default function Resume( {FIELDS_OF_STUDY = [], WORK_MODES = [], EDUCATIO
     setTimeout(() => setSaved(prev => ({ ...prev, [key]: false })), 2000)
   }
 
+  const SEEKER_SECTIONS = new Set(['fullName', 'email', 'age', 'location', 'shortDesc', 'bio'])
+
   const handleUpdate = async (section, fields) => {
     setSaving(prev => ({ ...prev, [section]: true }))
     try {
-      // ── TODO: Replace with real PATCH/PUT API call ──
-      // await fetch(`${import.meta.env.VITE_API_BASE_URL}/seeker/me`, {
-      //   method: 'PATCH',
-      //   credentials: 'include',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(fields)
-      // })
-      // ── END TODO ──
-      await new Promise(r => setTimeout(r, 600)) // simulated delay — remove when wired up
+      if (section === 'all') {
+        const { full_name, email, age, city, state, country, short_desc, bio, ...resumeFields } = fields
+        await Promise.all([
+          fetch(`${API_BASE_URL}/seeker/me`, {
+            method: 'PATCH', credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ full_name, email, age, city, state, country, short_desc, bio }),
+          }),
+          fetch(`${API_BASE_URL}/resume/${resume.resumeId}`, {
+            method: 'PATCH', credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(resumeFields),
+          }),
+        ])
+      } else {
+        const endpoint = SEEKER_SECTIONS.has(section)
+          ? `${API_BASE_URL}/seeker/me`
+          : `${API_BASE_URL}/resume/${resume.resumeId}`
+        const res = await fetch(endpoint, {
+          method: 'PATCH', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(fields),
+        })
+        if (!res.ok) throw new Error('Save failed')
+      }
       flashSaved(section)
-    } catch (err) {
+    } catch {
       alert('Failed to save. Please try again.')
     } finally {
       setSaving(prev => ({ ...prev, [section]: false }))
@@ -279,7 +297,7 @@ export default function Resume( {FIELDS_OF_STUDY = [], WORK_MODES = [], EDUCATIO
 
   return (
     <div className="page">
-      <DashNav activePage="home" />
+      <DashNav activePage="resume" userType="seeker" />
 
       <div className="resume-page">
         <div className="resume-card">

@@ -32,6 +32,7 @@ export default function RegisterStep1() {
   const handleSubmit = () => {
     const e = validate()
     if (Object.keys(e).length > 0) { setErrors(e); return }
+    sessionStorage.setItem('reg_step1', JSON.stringify({ fullName: form.fullName, email: form.email, password: form.password }))
     navigate(`/register/${role}/step2`)
   }
 
