@@ -24,6 +24,7 @@ import JobPostingForm from './pages/JobPostingForm'
 import ManageJobs from './pages/ManageJobs'
 
 import JobDetail from './pages/JobDetail'
+import CandidateDetail from './pages/CandidateDetail'
 
 // Dev
 import HealthCheck from './test.jsx'
@@ -92,6 +93,7 @@ function App() {
       <Route path="/jobs/:jobId/edit" element={<JobPostingForm {...enumProps} />} />
 
       <Route path="/job/:jobId" element={<JobDetail API_BASE_URL={API_BASE_URL} />} />
+      <Route path="/candidate/:candidateId" element={<CandidateDetail {...enumProps} />} />
 
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
