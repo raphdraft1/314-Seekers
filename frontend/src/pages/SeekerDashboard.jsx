@@ -165,6 +165,7 @@ export default function SeekerDashboard({ API_BASE_URL }) {
 function JobCard({ job, onClick, showMatch }) {
   return (
     <div className="job-card" onClick={onClick}>
+      <p>EUFgbwsiufbviufb</p>
       <div className="job-card-main">
         <div className="job-card-title">{job.title || 'Untitled Position'}</div>
         <div className="job-card-company">{job.company_name || 'Company'}</div>

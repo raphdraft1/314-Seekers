@@ -12,7 +12,6 @@ export default function EmployerDashboard({ API_BASE_URL }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // TODO: Backend needs GET /getCompany endpoint (mirrors /getSeeker)
         const companyRes = await fetch(`${API_BASE_URL}/getCompany`, {
           method: 'POST',
           credentials: 'include',

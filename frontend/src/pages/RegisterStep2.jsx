@@ -145,10 +145,14 @@ function EducationSection({ data, onChange, FIELDS_OF_STUDY, EDUCATION_LEVELS })
         <MultiSelectDropdown
           options={FIELDS_OF_STUDY}
           selected={data.fieldOfStudy}
-          onToggle={f => onChange('fieldOfStudy', data.fieldOfStudy.includes(f)
-            ? data.fieldOfStudy.filter(x => x !== f)
-            : [...data.fieldOfStudy, f]
-          )}
+          onToggle={f => {
+            console.log("Toggling field of study:", f);
+            const updatedFieldOfStudy = data.fieldOfStudy.includes(f)
+              ? data.fieldOfStudy.filter(x => x !== f)
+              : [...data.fieldOfStudy, f];
+            console.log("Updated fieldOfStudy:", updatedFieldOfStudy);
+            onChange('fieldOfStudy', updatedFieldOfStudy);
+          }}
         />
       </div>
     </div>

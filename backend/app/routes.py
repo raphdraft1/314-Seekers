@@ -28,6 +28,8 @@ def login():
     if success:
         session["user_id"] = success.id
         session["user_type"] = "seeker"
+        print(session["user_id"])
+        print(session["user_type"])
         return jsonify({"message": "Seeker login successful"}), 200
     else:
         success = db_DA.authenticate_company(email, password)
@@ -47,7 +49,7 @@ def register_seeker():
     data = request.get_json()
     email = data.get("email")
     password = data.get("password")
-    name = data.get("full_name")
+    name = data.get("name")
     age = data.get("age")
     city = data.get("city")
     state = data.get("state")
@@ -68,7 +70,7 @@ def register_seeker():
 
     #Create both seeker and resume if seeker is new
     if db_DA.create_seeker(name, email, age, city, state, country, short_desc, bio, password):
-        seekerId = db_DA.get_seeker_by_identifier(email = email) 
+        seekerId = db_DA.get_seeker_by_identifier(email = email).id
         db_DA.create_resume(seekerId, education, experience, skills, exp_years, work_mode, field_of_study, preferred_city, preferred_state, preferred_country)
 
         #Create sessdion cookies
@@ -98,7 +100,7 @@ def register_company():
 
     #Create company if company is new
     if db_DA.create_company(name, email, city, state, country, short_desc, bio, fYear, industry, culture, password):
-        company_id = db_DA.get_company_by_identifier(email = email)
+        company_id = db_DA.get_company_by_identifier(email = email).id
         session["user_id"] = company_id
         session["user_type"] = "company"
 
@@ -141,6 +143,9 @@ def get_resume():
 #Get seeker data
 @api.route("/getSeeker", methods=["POST"])
 def get_seeker():
+    if "user_id" not in session:
+        print("No user_id in session")
+        return jsonify({"error": "Unauthorized"}), 401
     seeker = db_DA.get_seeker_by_identifier(seeker_id=session["user_id"])
     if not seeker:
         return jsonify({"error": "Seeker not found"}), 404
@@ -159,3 +164,138 @@ def get_seeker():
     }
 
     return jsonify({"seeker": seeker_json})
+
+#Get company data
+@api.route("/getCompany", methods=["POST"])
+def get_company():
+    if "user_id" not in session:
+        print("No user_id in session")
+        return jsonify({"error": "Unauthorized"}), 401
+    company = db_DA.get_company_by_identifier(company_id=session["user_id"])
+    if not company:
+        return jsonify({"error": "Company not found"}), 404
+
+    company_json = {
+        "id": company.id,
+        "name": company.company_name,
+        "email": company.email,
+        "city": company.city,
+        "state": company.state,
+        "country": company.country,
+        "short_desc": company.short_desc,
+        "bio": company.bio,
+        "culture": company.culture,
+        "membership": company.membership,
+        "founded_year": company.founded_year,
+        "industry": company.industry
+    }
+
+    return jsonify({"company": company_json})
+
+
+@api.route("/search/jobs", methods=["GET"])
+def get_jobs():
+
+    #Extract filter variables from query parameters
+    query = request.args.get('q') or None
+    work_mode = request.args.get('work_mode')
+    education = request.args.get('required_education') or None
+    experience = request.args.get('exp_years') or None
+    city = request.args.get('city') or None
+    state = request.args.get('state') or None
+    country = request.args.get('country') or None
+
+    #Require work mode in array
+    if not isinstance(work_mode, list):
+        work_mode = [work_mode] if work_mode else None
+
+    print (work_mode, education, experience, city, state, country)
+
+    #Get matching jobs from database
+    raw_jobs = db_DA.query_jobposting(
+        query_text=query, 
+        required_skills=None, 
+        required_education=education,
+        exp_years=experience, 
+        work_mode=work_mode, 
+        field_of_study=None, 
+        city=city, 
+        state=state, 
+        country=country)
+    
+    jobs = []
+    for job in raw_jobs:
+        jobs.append({
+            "id": job.id,
+            "city": job.city,
+            #"companyId": job.company_id,
+            #"country": job.country,
+            "exp_years": job.exp_years,
+            #"field_of_study": job.field_of_study,
+            #"required_education": job.required_education,
+            "required_skills": job.required_skills,
+            #"responsibilities": job.responsibilities,
+            "state": job.state,
+            "summary": job.summary,
+            "title": job.title,
+            "work_mode": job.work_mode, 
+            "company_name": job.company_name,
+            #"company_email": job.company_email
+        })
+
+    return jsonify({"jobs": jobs})
+
+#Gte filter options for search page
+@api.route("/search/filters", methods=["GET"])
+def get_filter_options():
+
+    #Cookie existence check
+    if "user_type" not in session:
+        print("No user_id or user_type in session")
+        return jsonify({"error": "No cookie found"}), 403
+    
+    locations = []
+    skills = [] 
+    if session.get("user_type") == "seeker":
+        locations = db_EG.get_unique_locations("seeker")
+        skills = db_EG.get_unique_skills("seeker")
+    else:
+        locations = db_EG.get_unique_locations("company")
+        skills = db_EG.get_unique_skills("company")
+
+    return jsonify({"locations": locations, "skills": skills})
+
+
+@api.route("/jobposting", methods=["GET"])
+def get_jobposting():
+    
+    #Extract id 
+    id = request.args.get("jobId") or None
+    if not id:
+        return jsonify({"error": "Job ID is required"}), 400
+
+
+    rawJob = db_DA.get_jobposting_by_id(id)
+    if not rawJob:
+        return jsonify({"error": "Job not found"}), 404
+
+    #Convert format to JSONifyable
+    job = {
+        "id": rawJob.id,
+        "city": rawJob.city,
+        "companyId": rawJob.company_id,
+        "country": rawJob.country,
+        "exp_years": rawJob.exp_years,
+        "field_of_study": rawJob.field_of_study,
+        "required_education": rawJob.required_education,
+        "required_skills": rawJob.required_skills,
+        "responsibilities": rawJob.responsibilities,
+        "state": rawJob.state,
+        "summary": rawJob.summary,
+        "title": rawJob.title,
+        "work_mode": rawJob.work_mode, 
+        "company_name": rawJob.company_name,
+        "company_email": rawJob.company_email
+    }  
+
+    return jsonify({"job": job})

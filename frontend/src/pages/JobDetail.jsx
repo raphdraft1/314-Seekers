@@ -14,12 +14,10 @@ export default function JobDetail({ API_BASE_URL }) {
   useEffect(() => {
     const fetchJob = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/jobpostings/${jobId}`, {
-          credentials: 'include',
-        })
+        const res = await fetch(`${API_BASE_URL}/jobposting?jobId=${jobId}`)
         if (res.ok) {
           const data = await res.json()
-          setJob(data.jobposting)
+          setJob(data.job)
         } else {
           setError('Job posting not found.')
         }
@@ -51,7 +49,10 @@ export default function JobDetail({ API_BASE_URL }) {
             {/* Header */}
             <h1 className="dash-welcome-title" style={{ marginBottom: 4 }}>{job.title}</h1>
             {job.company_name && (
-              <p className="job-card-company" style={{ fontSize: 16, marginBottom: 16 }}>{job.company_name}</p>
+              <p className="job-card-company" style={{ fontSize: 16 }}>{job.company_name}</p>
+            )}
+            {job.company_email && (
+              <p className="job-card-company" style={{ fontSize: 14, marginBottom: 16 }}>{job.company_email}</p>
             )}
 
             {/* Meta row */}
@@ -103,7 +104,7 @@ export default function JobDetail({ API_BASE_URL }) {
                 <p className="filter-section-title" style={{ marginBottom: 8 }}>Education Requirements</p>
                 {job.required_education != null && (
                   <p className="review-block-text" style={{ marginBottom: 6 }}>
-                    Minimum education level: {job.required_education}
+                    Minimum education level: {typeof job.required_education === 'object' ? Object.values(job.required_education)[0] : job.required_education}
                   </p>
                 )}
                 {job.field_of_study?.length > 0 && (

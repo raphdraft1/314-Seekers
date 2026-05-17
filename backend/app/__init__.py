@@ -14,9 +14,14 @@ def create_app():
 
     #Create flask instance
     app = Flask(__name__)
+    app.secret_key = os.getenv("AUTH_KEY")
 
     #Allow all origins
     CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
+
+    #Cookie settings
+    app.config["SESSION_COOKIE_SAMESITE"] = "lax"
+    app.config["SESSION_COOKIE_SECURE"] = False
 
 
     # Register blueprints

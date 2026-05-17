@@ -59,7 +59,7 @@ class JobPosting:
         self.summary = summary
         self.responsibilities = responsibilities
         self.required_education = required_education
-        self.required_skils = required_skills
+        self.required_skills = required_skills
         self.exp_years = exp_years
         self.work_mode = work_mode
         self.field_of_study = field_of_study

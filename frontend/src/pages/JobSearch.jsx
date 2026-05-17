@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, use } from 'react'
 import { useNavigate } from 'react-router-dom'
 import DashNav from '../components/DashNav'
 
@@ -8,6 +8,10 @@ export default function JobSearch({ API_BASE_URL, EDUCATION_LEVELS = [], WORK_MO
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
   const [searched, setSearched] = useState(false)
+  const [city, setCity] = useState([])
+  const [state, setState] = useState([])
+  const [country, setCountry] = useState([])
+  const [skill, setSkill] = useState([])
   const [filters, setFilters] = useState({
     work_mode: [],
     required_education: '',
@@ -17,6 +21,27 @@ export default function JobSearch({ API_BASE_URL, EDUCATION_LEVELS = [], WORK_MO
     country: '',
   })
   const [showFilters, setShowFilters] = useState(false)
+
+  useEffect(() => {
+    //Get initial filter params for location and skills
+    fetchFilterOptions()
+  }, [])
+
+  //Query backend for locatiun and skill options for filters
+  const fetchFilterOptions = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/search/filters`, { credentials: 'include'})
+      if (response.ok) {
+        const data = await response.json()
+        setCity(data.locations.cities || [])
+        setState(data.locations.states || [])
+        setCountry(data.locations.countries || [])
+        setSkill(data.skills || [])
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
   const doSearch = async () => {
     setLoading(true)
@@ -31,13 +56,13 @@ export default function JobSearch({ API_BASE_URL, EDUCATION_LEVELS = [], WORK_MO
       if (filters.state) params.set('state', filters.state)
       if (filters.country) params.set('country', filters.country)
 
-      // TODO: Backend needs GET /search/jobs?q=...&work_mode=...&etc
+      //Job search endpoint
       const res = await fetch(`${API_BASE_URL}/search/jobs?${params}`, {
         credentials: 'include',
       })
       if (res.ok) {
         const data = await res.json()
-        setResults(data.jobpostings || [])
+        setResults(data.jobs || [])
       }
     } catch (err) {
       console.error(err)
@@ -154,9 +179,38 @@ export default function JobSearch({ API_BASE_URL, EDUCATION_LEVELS = [], WORK_MO
               </FilterSection>
 
               <FilterSection title="Location">
-                <input className="field-input" placeholder="City" value={filters.city} onChange={e => setFilters(f => ({ ...f, city: e.target.value }))} />
-                <input className="field-input" style={{ marginTop: 8 }} placeholder="State" value={filters.state} onChange={e => setFilters(f => ({ ...f, state: e.target.value }))} />
-                <input className="field-input" style={{ marginTop: 8 }} placeholder="Country" value={filters.country} onChange={e => setFilters(f => ({ ...f, country: e.target.value }))} />
+                <select
+                  className="field-select"
+                  value={filters.city}
+                  onChange={e => setFilters(f => ({ ...f, city: e.target.value }))}
+                >
+                  <option value="">Select City</option>
+                  {city.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+                <select
+                  className="field-select"
+                  style={{ marginTop: 8 }}
+                  value={filters.state}
+                  onChange={e => setFilters(f => ({ ...f, state: e.target.value }))}
+                >
+                  <option value="">Select State</option>
+                  {state.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+                <select
+                  className="field-select"
+                  style={{ marginTop: 8 }}
+                  value={filters.country}
+                  onChange={e => setFilters(f => ({ ...f, country: e.target.value }))}
+                >
+                  <option value="">Select Country</option>
+                  {country.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
               </FilterSection>
 
               <button className="btn-primary btn-wide" style={{ marginTop: 8 }} onClick={doSearch}>

@@ -43,6 +43,7 @@ export default function EmployerStep3() {
 
       if (response.status === 201) {
         sessionStorage.setItem('user_type', 'company')
+        console.log(sessionStorage.getItem('user_type'))
         sessionStorage.removeItem('reg_step1')
         sessionStorage.removeItem('employerProfile')
         navigate('/dashboard')

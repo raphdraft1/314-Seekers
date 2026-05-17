@@ -40,7 +40,7 @@ class DataAccess:
     """
     def __init__(self, connection: Connection):
         self.client = connection.client
-        self.embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+        self.model = SentenceTransformer("all-MiniLM-L6-v2")
 
     def create_seeker(self, full_name: str, email: str, age: int, city: str, state: str, country: str, 
                      short_desc: str, bio: str, password: str) -> bool:
@@ -120,7 +120,7 @@ class DataAccess:
             print("Password must not be an empty string.")
             return False
 
-        self.client.collections["seekers"].documents.create({
+        self.client.collections["companies"].documents.create({
             "company_name": company_name,
             "email": email,
             "city": city,
@@ -443,7 +443,7 @@ class DataAccess:
                                 exp_years=result["exp_years"], work_mode=result["work_mode"], field_of_study=result["field_of_study"], 
                                 city=result["city"], state=result["state"], country=result["country"], jobposting_embedding=result["jobposting_embedding"])
             jobposting.company_name = result["companies"]["company_name"]
-            jobposting.company_email = result["companies"]["company_name"]
+            jobposting.company_email = result["companies"]["email"]
             return jobposting
     
         except ts.exceptions.ObjectNotFound as e:
@@ -684,7 +684,7 @@ class DataAccess:
             result = self.client.multi_search.perform({
                 "searches": [{
                     "collection": "resumes",
-                    "q": f"{" ".join(jobposting_to_use.required_skils)}",
+                    "q": f"{" ".join(jobposting_to_use.required_skills)}",
                     "query_by": "skills",
                     "filter_by": f"education:>={jobposting_to_use.required_education} && exp_years:>={jobposting_to_use.exp_years} && \
                     work_mode:=[{", ".join(jobposting_to_use.work_mode)}] && field_of_study:=[{", ".join(jobposting_to_use.field_of_study)}] && \
