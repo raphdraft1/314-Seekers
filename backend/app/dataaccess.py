@@ -686,7 +686,7 @@ class DataAccess:
                     "collection": "resumes",
                     "q": f"{" ".join(jobposting_to_use.required_skills)}",
                     "query_by": "skills",
-                    "filter_by": f"education:>={jobposting_to_use.required_education} && exp_years:>={jobposting_to_use.exp_years} && \
+                    "filter_by": f"education:>={list(jobposting_to_use.required_education.keys())[0]} && exp_years:>={jobposting_to_use.exp_years} && \
                     work_mode:=[{", ".join(jobposting_to_use.work_mode)}] && field_of_study:=[{", ".join(jobposting_to_use.field_of_study)}] && \
                     preferred_country:={jobposting_to_use.country}",
                     
@@ -730,7 +730,7 @@ class DataAccess:
                     "collection": "jobpostings",
                     "q": f"{" ".join(resume_to_use.skills)}",
                     "query_by": "required_skills",
-                    "filter_by": f"required_education:<={resume_to_use.education} && exp_years:<={resume_to_use.exp_years} && \
+                    "filter_by": f"required_education:<={list(resume_to_use.education.keys())[0]} && exp_years:<={resume_to_use.exp_years} && \
                     work_mode:=[{", ".join(resume_to_use.work_mode)}] && field_of_study:=[{", ".join(resume_to_use.field_of_study)}] && \
                     country:={resume_to_use.preferred_country}",
                     
@@ -739,7 +739,7 @@ class DataAccess:
                     "per_page": 20,
                     "include_fields": "$companies(company_name, email)"
             }]})
-
+            print (result)
             jobposting_list = self._json_to_jobposting_list(result["results"][0])
             return jobposting_list
         return []

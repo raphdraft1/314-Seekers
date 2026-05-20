@@ -6,7 +6,7 @@ export default function SeekerDashboard({ API_BASE_URL }) {
   const navigate = useNavigate()
   const [seeker, setSeeker] = useState(null)
   const [recommended, setRecommended] = useState([])
-  const [recentJobs, setRecentJobs] = useState([])
+  const [Jobs, setJobs] = useState([])
   const [loading, setLoading] = useState(true)
   const [recLoading, setRecLoading] = useState(true)
 
@@ -25,14 +25,13 @@ export default function SeekerDashboard({ API_BASE_URL }) {
           navigate('/')
         }
 
-        // Fetch all job postings (recent)
-        // TODO: Backend needs GET /jobpostings endpoint
-        const jobsRes = await fetch(`${API_BASE_URL}/jobpostings`, {
+        // Fetch 3 job postings 
+        const jobsRes = await fetch(`${API_BASE_URL}/search/jobs`, {
           credentials: 'include',
         })
         if (jobsRes.ok) {
           const data = await jobsRes.json()
-          setRecentJobs((data.jobpostings || []).slice(0, 6))
+          setJobs((data.jobs || []).slice(0, 3))
         }
       } catch (err) {
         console.error(err)
@@ -43,13 +42,13 @@ export default function SeekerDashboard({ API_BASE_URL }) {
 
     const fetchRecommended = async () => {
       try {
-        // TODO: Backend needs GET /recommendations/jobs?resume_id=X
+        // Get 3 recommendations
         const res = await fetch(`${API_BASE_URL}/recommendations/jobs`, {
           credentials: 'include',
         })
         if (res.ok) {
           const data = await res.json()
-          setRecommended((data.jobpostings || []).slice(0, 3))
+          setRecommended((data.job || []).slice(0, 3))
         }
       } catch (err) {
         console.error(err)
@@ -60,6 +59,8 @@ export default function SeekerDashboard({ API_BASE_URL }) {
 
     fetchData()
     fetchRecommended()
+    console.log("Jobs: ", Jobs)
+    console.log("Recommended: ", recommended)
   }, [])
 
   return (
@@ -147,11 +148,11 @@ export default function SeekerDashboard({ API_BASE_URL }) {
               Search all →
             </button>
           </div>
-          {recentJobs.length === 0 ? (
+          {Jobs.length === 0 ? (
             <div className="dash-empty">No job postings found.</div>
           ) : (
             <div className="job-card-list">
-              {recentJobs.map(job => (
+              {Jobs.map(job => (
                 <JobCard key={job.id} job={job} onClick={() => navigate(`/job/${job.id}`)} />
               ))}
             </div>
@@ -165,7 +166,6 @@ export default function SeekerDashboard({ API_BASE_URL }) {
 function JobCard({ job, onClick, showMatch }) {
   return (
     <div className="job-card" onClick={onClick}>
-      <p>EUFgbwsiufbviufb</p>
       <div className="job-card-main">
         <div className="job-card-title">{job.title || 'Untitled Position'}</div>
         <div className="job-card-company">{job.company_name || 'Company'}</div>

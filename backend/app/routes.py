@@ -20,7 +20,6 @@ def login():
     email = data.get("email")
     password = data.get("password")
     success = ""
-    print(email)
 
 
     #Check if the user is a seeker or company and return error if none
@@ -28,8 +27,7 @@ def login():
     if success:
         session["user_id"] = success.id
         session["user_type"] = "seeker"
-        print(session["user_id"])
-        print(session["user_type"])
+        session["membership"] = success.membership
         return jsonify({"message": "Seeker login successful"}), 200
     else:
         success = db_DA.authenticate_company(email, password)
@@ -37,9 +35,16 @@ def login():
     if success:
         session["user_id"] = success.id
         session["user_type"] = "company"
+        session["membership"] = success.membership
         return jsonify({"message": "Company login successful"}), 200
     else:
         return jsonify({"error": "Invalid email or password"}), 401
+    
+#Logout function
+@api.route("/logout", methods=["POST"])
+def logout():   
+    session.clear()
+    return jsonify({"message": "Logout successful"}), 200
 
 #Seeker registration
 @api.route("/register/seeker", methods=["POST"])
@@ -76,7 +81,7 @@ def register_seeker():
         #Create sessdion cookies
         session["user_id"] = seekerId
         session["user_type"] = "seeker"
-
+        session["membership"] = False
         return jsonify({"result": "Seeker and resume created successfully"}), 201
     else:
         return jsonify({"error": "Account already exists"}), 400
@@ -103,6 +108,7 @@ def register_company():
         company_id = db_DA.get_company_by_identifier(email = email).id
         session["user_id"] = company_id
         session["user_type"] = "company"
+        session["membership"] = False
 
         return jsonify({"result": "Company created successfully"}), 201
     else:
@@ -115,6 +121,20 @@ def setup():
     return jsonify({"fields_of_study": db_EG.get_fields_of_study(), 
                     "work_modes": db_EG.get_work_modes(),
                     "education_levels": db_EG.get_education_levels()})
+
+#Upgrade membership
+@api.route("/membership", methods=["POST"])
+def upgrade():
+    membership = session.get("membership")
+    if membership is None:
+        return jsonify({"error": "Cookie error"}), 401
+    
+    #Upgrade membership funct here
+    membership = True
+
+    session["membership"] = membership
+
+    return jsonify({"membership": membership})
 
 
 #Get resume data for seeker
@@ -209,7 +229,6 @@ def get_jobs():
     if not isinstance(work_mode, list):
         work_mode = [work_mode] if work_mode else None
 
-    print (work_mode, education, experience, city, state, country)
 
     #Get matching jobs from database
     raw_jobs = db_DA.query_jobposting(
@@ -299,3 +318,63 @@ def get_jobposting():
     }  
 
     return jsonify({"job": job})
+
+@api.route("/recommendations/jobs", methods=["GET"])
+def get_job_recommendations():
+    
+    #Extract page 
+    if "page" in request.args:
+        try:
+            page = int(request.args.get("page"))
+        except ValueError:
+            return jsonify({"error": "Invalid page number"}), 400
+    else:
+        page = 1 
+
+    #Extract resume ID and membership from user profile
+    userId = session.get("user_id")
+    membership = session.get("membership")
+    if not userId:
+        return jsonify({"error": "Cookie Error"}), 403
+    
+    resumeId = db_DA.get_all_resumes_by_seeker(userId)[0].id
+    if not resumeId:    
+        return jsonify({"error": "Resume not found for user"}), 404
+
+
+    #Get recommendations
+    rawJobs = db_DA.rank_jobpostings_by_resume(resumeId, page)
+    if not rawJobs:
+        return jsonify({"error": "No jobs found for the given page"}), 404
+    
+    job = []
+    #Convert format to JSONifyable
+    for rawJob in rawJobs:
+        
+        job.append({
+            "id": rawJob.id,
+            "city": rawJob.city,
+            "companyId": rawJob.company_id,
+            "country": rawJob.country,
+            "exp_years": rawJob.exp_years,
+            "field_of_study": rawJob.field_of_study,
+            "required_education": rawJob.required_education,
+            "required_skills": rawJob.required_skills,
+            "responsibilities": rawJob.responsibilities,
+            "state": rawJob.state,
+            "summary": rawJob.summary,
+            "title": rawJob.title,
+            "work_mode": rawJob.work_mode, 
+            "company_name": rawJob.company_name,
+            "company_email": rawJob.company_email
+        })
+
+    
+    #check if there are other pages
+    nextJobs = db_DA.rank_jobpostings_by_resume(resumeId, page + 1)
+    if nextJobs is []:
+        hasNext = False
+    else:
+        hasNext = True
+
+    return jsonify({"job": job, "hasMore": hasNext, "membership": membership})

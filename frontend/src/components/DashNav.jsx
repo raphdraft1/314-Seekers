@@ -4,8 +4,8 @@ export default function DashNav({ activePage = 'home', userType = 'seeker' }) {
   const navigate = useNavigate()
 
   const handleLogout = async () => {
-    // TODO: Backend needs POST /logout endpoint
-    // await fetch(`${import.meta.env.VITE_API_BASE_URL}/logout`, { method: 'POST', credentials: 'include' })
+    //logout API call
+    await fetch(`${import.meta.env.VITE_API_BASE_URL}/logout`, { method: 'POST', credentials: 'include' })
     sessionStorage.clear()
     navigate('/')
   }

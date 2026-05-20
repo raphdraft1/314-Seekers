@@ -23,6 +23,8 @@ export default function JobSearch({ API_BASE_URL, EDUCATION_LEVELS = [], WORK_MO
   const [showFilters, setShowFilters] = useState(false)
 
   useEffect(() => {
+    //Get all jobs for inital display
+    doSearch()
     //Get initial filter params for location and skills
     fetchFilterOptions()
   }, [])

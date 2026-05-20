@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import { useNavigate } from 'react-router-dom'
 import DashNav from '../components/DashNav'
 
@@ -9,6 +9,25 @@ export default function RecommendedJobs({ API_BASE_URL }) {
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(false)
   const [isMember, setIsMember] = useState(false)
+
+
+
+  //Change membership
+  const toggleMembership = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/membership`, {
+        method: 'POST',
+        credentials: 'include'
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setIsMember(data.membership || false)
+        fetchRecommended(1)
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
   useEffect(() => {
     fetchRecommended(1)
@@ -23,10 +42,10 @@ export default function RecommendedJobs({ API_BASE_URL }) {
       })
       if (res.ok) {
         const data = await res.json()
-        const newJobs = data.jobpostings || []
+        const newJobs = data.job || []
         setJobs(prev => pageNum === 1 ? newJobs : [...prev, ...newJobs])
-        setHasMore(data.has_more || false)
-        setIsMember(data.is_member || false)
+        setHasMore(data.hasMore || false)
+        setIsMember(data.membership || false)
         setPage(pageNum)
       }
     } catch (err) {
@@ -53,7 +72,9 @@ export default function RecommendedJobs({ API_BASE_URL }) {
             <div className="membership-cta">
               <span>🔒 Free plan: Top 10 matches</span>
               {/* TODO: wire to membership upgrade flow */}
-              <button className="btn-primary" style={{ marginLeft: 12 }}>Upgrade</button>
+              <button className="btn-primary" style={{ marginLeft: 12 }} onClick={toggleMembership}>
+                Upgrade
+              </button>
             </div>
           )}
         </div>
