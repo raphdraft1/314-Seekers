@@ -134,7 +134,30 @@ class DataAccess:
             "membership": False,
             "password": generate_password_hash(password.strip())
         })
-        return True 
+        return True
+
+    def update_membership(self, user_type: str, user_id: str):
+        r"""
+        Upgrade the membership status of a given user identified by `user_id`, whose user type is determined by
+        `user_id`.<br>  
+        The `user_type` parameter also determines the Typesense collection where the change in membership status occurs.
+        See the "Args" section for more detail. Other unrecognised user type names will result in a TypeError.
+
+        ## Args
+            **user_type**: *str*
+            The user type for which to upgrade membership. Can be either '**seeker**' or '**company**.'
+            Use the correct user type name depending on the type of user for which the membership upgrade should be done.
+            For instance, for upgrading of a **seeker**'s membership, use 'seeker' as the parameter, and vice versa.
+            **user_id**: *str*
+        """
+        # Check user_type
+        if user_type not in ["seeker", "company"]:
+            raise TypeError("Invalid workflow name. Please pass either 'seeker' or 'company' for the user_type parameter.")
+        
+        # Set the correct collection name to perform update
+        collection_name = "seekers" if user_type == "seeker" else "companies"
+        # Update the document identified by user_id
+        self.client.collections[collection_name].documents[user_id].update({'membership': True})
 
     def authenticate_seeker(self, email: str, password: str) -> Seeker | None:
         r"""
