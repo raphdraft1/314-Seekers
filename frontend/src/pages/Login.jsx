@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 
-function Login({API_BASE_URL}) {
+function Login({API_BASE_URL, TYPE, setType}) {
     const [form, setForm] = useState({ email: '', password: '' })
     const [showPassword, setShowPassword] = useState(false)
     const [errors, setErrors] = useState({})
@@ -32,9 +32,10 @@ function Login({API_BASE_URL}) {
             const data = await response.json()
             // Store user_type so App.jsx can route to the correct dashboard
             // Backend returns 'seeker' or 'company' in the message or a dedicated field
-            // TODO: Backend should return { user_type: 'seeker'|'company' } in the login response
-            // const userType = data.user_type || (data.message?.includes('Company') ? 'company' : 'seeker')
-            // sessionStorage.setItem('user_type', userType)
+            const userType = data.type
+            console.log("userType: ", userType)
+            //sessionStorage.setItem('user_type', userType)
+            setType(userType)
             navigate('/dashboard')
         } else if (response.status === 401) alert("Invalid email or password")
         else alert("Server error. Please try again later.")

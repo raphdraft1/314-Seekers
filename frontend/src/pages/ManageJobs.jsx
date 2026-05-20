@@ -10,11 +10,11 @@ export default function ManageJobs({ API_BASE_URL }) {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        // TODO: Backend needs GET /jobpostings/mine
-        const res = await fetch(`${API_BASE_URL}/jobpostings/mine`, { credentials: 'include' })
+        // TODO: Backend needs GET /postings
+        const res = await fetch(`${API_BASE_URL}/postings`, { credentials: 'include' })
         if (res.ok) {
           const data = await res.json()
-          setJobs(data.jobpostings || [])
+          setJobs(data.postings || [])
         }
       } catch (err) {
         console.error(err)

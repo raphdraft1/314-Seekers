@@ -33,6 +33,7 @@ function App() {
   const [FIELDS_OF_STUDY, setFieldsOfStudy] = useState([])
   const [WORK_MODES, setWorkModes] = useState([])
   const [EDUCATION_LEVELS, setEducationLevels] = useState([])
+  const [TYPE, setType] = useState('')
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
@@ -72,7 +73,7 @@ function App() {
 
       {/* Auth / onboarding */}
       <Route path="/" element={<AccountType />} />
-      <Route path="/login" element={<Login API_BASE_URL={API_BASE_URL} />} />
+      <Route path="/login" element={<Login API_BASE_URL={API_BASE_URL} TYPE={TYPE} setType={setType} />} />
       <Route path="/register/:role/step1" element={<RegisterStep1 />} />
       <Route path="/register/employer/step2" element={<EmployerStep2 />} />
       <Route path="/register/employer/step3" element={<EmployerStep3 />} />
@@ -80,9 +81,9 @@ function App() {
       <Route path="/register/:role/step3" element={<RegisterStep3 API_BASE_URL={API_BASE_URL} />} />
 
       {/* Shared — renders correct component based on sessionStorage user_type */}
-      <Route path="/dashboard"   element={sessionStorage.getItem('user_type') === 'company' ? <EmployerDashboard API_BASE_URL={API_BASE_URL} /> : <SeekerDashboard API_BASE_URL={API_BASE_URL} />} />
-      <Route path="/search"      element={sessionStorage.getItem('user_type') === 'company' ? <CandidateSearch {...enumProps} /> : <JobSearch {...enumProps} />} />
-      <Route path="/recommended" element={sessionStorage.getItem('user_type') === 'company' ? <RecommendedCandidates API_BASE_URL={API_BASE_URL} /> : <RecommendedJobs API_BASE_URL={API_BASE_URL} />} />
+      <Route path="/dashboard"   element={TYPE === 'company' ? <EmployerDashboard API_BASE_URL={API_BASE_URL} /> : <SeekerDashboard API_BASE_URL={API_BASE_URL} />} />
+      <Route path="/search"      element={TYPE === 'company' ? <CandidateSearch {...enumProps} /> : <JobSearch {...enumProps} />} />
+      <Route path="/recommended" element={TYPE === 'company' ? <RecommendedCandidates API_BASE_URL={API_BASE_URL} /> : <RecommendedJobs API_BASE_URL={API_BASE_URL} />} />
 
       {/* Seeker only */}
       <Route path="/resume" element={<Resume {...enumProps} />} />

@@ -28,7 +28,7 @@ def login():
         session["user_id"] = success.id
         session["user_type"] = "seeker"
         session["membership"] = success.membership
-        return jsonify({"message": "Seeker login successful"}), 200
+        return jsonify({"message": "Seeker login successful", "type": "seeker"}), 200
     else:
         success = db_DA.authenticate_company(email, password)
 
@@ -36,7 +36,7 @@ def login():
         session["user_id"] = success.id
         session["user_type"] = "company"
         session["membership"] = success.membership
-        return jsonify({"message": "Company login successful"}), 200
+        return jsonify({"message": "Company login successful", "type": "company"}), 200
     else:
         return jsonify({"error": "Invalid email or password"}), 401
     
@@ -378,3 +378,35 @@ def get_job_recommendations():
         hasNext = True
 
     return jsonify({"job": job, "hasMore": hasNext, "membership": membership})
+
+
+#Employer routes
+
+#Get all employer job postings
+@api.route("/posting", methods=["GET"])
+def get_postings():
+    
+    postings = db_DA.get_all_jobpostings_by_company(session["user_id"])
+
+    #Convert format to JSONifyable
+    postings_json = []
+    for posting in postings:
+        postings_json.append({
+            "id": posting.id,
+            "city": posting.city,
+            "companyId": posting.company_id,
+            "country": posting.country,
+            "exp_years": posting.exp_years,
+            "field_of_study": posting.field_of_study,
+            "required_education": posting.required_education,
+            "required_skills": posting.required_skills,
+            "responsibilities": posting.responsibilities,
+            "state": posting.state,
+            "summary": posting.summary,
+            "title": posting.title,
+            "work_mode": posting.work_mode,
+            "company_name": posting.company_name,
+            "company_email": posting.company_email
+        })
+
+    return jsonify({"postings": postings_json})
