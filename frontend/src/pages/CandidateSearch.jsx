@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import DashNav from '../components/DashNav'
 
@@ -9,6 +9,10 @@ export default function CandidateSearch({ API_BASE_URL, EDUCATION_LEVELS = [], W
   const [loading, setLoading] = useState(false)
   const [searched, setSearched] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
+  const [city, setCity] = useState([])
+  const [state, setState] = useState([])
+  const [country, setCountry] = useState([])
+  const [skill, setSkill] = useState([])
   const [filters, setFilters] = useState({
     work_mode: [],
     education: '',
@@ -17,6 +21,29 @@ export default function CandidateSearch({ API_BASE_URL, EDUCATION_LEVELS = [], W
     preferred_state: '',
     preferred_country: '',
   })
+
+  useEffect(() => {
+    //Get all jobs for inital display
+    doSearch()
+    //Get initial filter params for location and skills
+    fetchFilterOptions()
+  }, [])
+
+  //Query backend for locatiun and skill options for filters
+  const fetchFilterOptions = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/search/filters`, { credentials: 'include'})
+      if (response.ok) {
+        const data = await response.json()
+        setCity(data.locations.cities || [])
+        setState(data.locations.states || [])
+        setCountry(data.locations.countries || [])
+        setSkill(data.skills || [])
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
   const doSearch = async () => {
     setLoading(true)
@@ -27,17 +54,17 @@ export default function CandidateSearch({ API_BASE_URL, EDUCATION_LEVELS = [], W
       if (filters.work_mode.length) params.set('work_mode', filters.work_mode.join(','))
       if (filters.education) params.set('education', filters.education)
       if (filters.exp_years) params.set('exp_years', filters.exp_years)
-      if (filters.preferred_city) params.set('preferred_city', filters.preferred_city)
-      if (filters.preferred_state) params.set('preferred_state', filters.preferred_state)
-      if (filters.preferred_country) params.set('preferred_country', filters.preferred_country)
+      if (filters.preferred_city) params.set('city', filters.preferred_city)
+      if (filters.preferred_state) params.set('state', filters.preferred_state)
+      if (filters.preferred_country) params.set('country', filters.preferred_country)
 
       // TODO: Backend needs GET /search/candidates?q=...&work_mode=...&etc
-      const res = await fetch(`${API_BASE_URL}/search/candidates?${params}`, {
+      const res = await fetch(`${API_BASE_URL}/search?${params}`, {
         credentials: 'include',
       })
       if (res.ok) {
         const data = await res.json()
-        setResults(data.resumes || [])
+        setResults(data.candidates || [])
       }
     } catch (err) {
       console.error(err)
@@ -99,8 +126,7 @@ export default function CandidateSearch({ API_BASE_URL, EDUCATION_LEVELS = [], W
                 <button className="filter-clear-btn" onClick={clearFilters}>Clear all</button>
               </div>
 
-              <div className="filter-section">
-                <p className="filter-section-title">Work Mode</p>
+              <FilterSection title="Work Mode">
                 {WORK_MODES.map(m => (
                   <label key={m} className="checkbox-option">
                     <input
@@ -116,27 +142,67 @@ export default function CandidateSearch({ API_BASE_URL, EDUCATION_LEVELS = [], W
                     <span>{m}</span>
                   </label>
                 ))}
-              </div>
+              </FilterSection>
 
-              <div className="filter-section">
-                <p className="filter-section-title">Minimum Education</p>
-                <select className="field-select" value={filters.education} onChange={e => setFilters(f => ({ ...f, education: e.target.value }))}>
+              <FilterSection title="Minimum Education">
+                <select
+                  className="field-select"
+                  value={filters.required_education}
+                  onChange={e => setFilters(f => ({ ...f, required_education: e.target.value }))}
+                >
                   <option value="">Any</option>
-                  {EDUCATION_LEVELS.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
+                  {EDUCATION_LEVELS.map(l => (
+                    <option key={l.value} value={l.value}>{l.label}</option>
+                  ))}
                 </select>
-              </div>
+              </FilterSection>
 
-              <div className="filter-section">
-                <p className="filter-section-title">Min. Years of Experience</p>
-                <input className="field-input" type="number" min="0" max="30" placeholder="e.g. 2" value={filters.exp_years} onChange={e => setFilters(f => ({ ...f, exp_years: e.target.value }))} />
-              </div>
+              <FilterSection title="Min. Years of Experience">
+                <input
+                  className="field-input"
+                  type="number"
+                  min="0"
+                  max="30"
+                  placeholder="e.g. 2"
+                  value={filters.exp_years}
+                  onChange={e => setFilters(f => ({ ...f, exp_years: e.target.value }))}
+                />
+              </FilterSection>
 
-              <div className="filter-section">
-                <p className="filter-section-title">Preferred Location</p>
-                <input className="field-input" placeholder="City" value={filters.preferred_city} onChange={e => setFilters(f => ({ ...f, preferred_city: e.target.value }))} />
-                <input className="field-input" style={{ marginTop: 8 }} placeholder="State" value={filters.preferred_state} onChange={e => setFilters(f => ({ ...f, preferred_state: e.target.value }))} />
-                <input className="field-input" style={{ marginTop: 8 }} placeholder="Country" value={filters.preferred_country} onChange={e => setFilters(f => ({ ...f, preferred_country: e.target.value }))} />
-              </div>
+              <FilterSection title="Location">
+                <select
+                  className="field-select"
+                  value={filters.preferred_city}
+                  onChange={e => setFilters(f => ({ ...f, preferred_city: e.target.value }))}
+                >
+                  <option value="">Select City</option>
+                  {city.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+                <select
+                  className="field-select"
+                  style={{ marginTop: 8 }}
+                  value={filters.preferred_state}
+                  onChange={e => setFilters(f => ({ ...f, preferred_state: e.target.value }))}
+                >
+                  <option value="">Select State</option>
+                  {state.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+                <select
+                  className="field-select"
+                  style={{ marginTop: 8 }}
+                  value={filters.preferred_country}
+                  onChange={e => setFilters(f => ({ ...f, preferred_country: e.target.value }))}
+                >
+                  <option value="">Select Country</option>
+                  {country.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </FilterSection>
 
               <button className="btn-primary btn-wide" style={{ marginTop: 8 }} onClick={doSearch}>Apply Filters</button>
             </div>
@@ -177,6 +243,15 @@ export default function CandidateSearch({ API_BASE_URL, EDUCATION_LEVELS = [], W
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+function FilterSection({ title, children }) {
+  return (
+    <div className="filter-section">
+      <p className="filter-section-title">{title}</p>
+      {children}
     </div>
   )
 }

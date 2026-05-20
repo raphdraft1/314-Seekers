@@ -33,10 +33,10 @@ export default function JobPostingForm({ API_BASE_URL, EDUCATION_LEVELS = [], WO
     const fetchJob = async () => {
       try {
         // TODO: Backend needs GET /jobpostings/:id
-        const res = await fetch(`${API_BASE_URL}/jobpostings/${jobId}`, { credentials: 'include' })
+        const res = await fetch(`${API_BASE_URL}/jobposting?jobId=${jobId}`, { credentials: 'include' })
         if (res.ok) {
           const data = await res.json()
-          const j = data.jobposting
+          const j = data.job
           setForm({
             title: j.title || '',
             summary: j.summary || '',
@@ -83,11 +83,11 @@ export default function JobPostingForm({ API_BASE_URL, EDUCATION_LEVELS = [], WO
     setApiError('')
     try {
       const payload = { ...form, exp_years: parseInt(form.exp_years) || 0 }
-
+      console.log('Submitting job posting with payload:', payload)
       let res
       if (isEditing) {
         // TODO: Backend needs PUT /jobpostings/:id
-        res = await fetch(`${API_BASE_URL}/jobpostings/${jobId}`, {
+        res = await fetch(`${API_BASE_URL}/updatePosting?jobId=${jobId}`, {
           method: 'PUT',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
@@ -95,7 +95,7 @@ export default function JobPostingForm({ API_BASE_URL, EDUCATION_LEVELS = [], WO
         })
       } else {
         // TODO: Backend needs POST /jobpostings
-        res = await fetch(`${API_BASE_URL}/jobpostings`, {
+        res = await fetch(`${API_BASE_URL}/newPosting`, {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
@@ -119,8 +119,7 @@ export default function JobPostingForm({ API_BASE_URL, EDUCATION_LEVELS = [], WO
   const handleDelete = async () => {
     if (!window.confirm('Delete this job posting? This cannot be undone.')) return
     try {
-      // TODO: Backend needs DELETE /jobpostings/:id
-      const res = await fetch(`${API_BASE_URL}/jobpostings/${jobId}`, {
+      const res = await fetch(`${API_BASE_URL}/deletePosting?jobId=${jobId}`, {
         method: 'DELETE',
         credentials: 'include',
       })

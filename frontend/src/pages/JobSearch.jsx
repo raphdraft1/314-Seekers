@@ -59,7 +59,7 @@ export default function JobSearch({ API_BASE_URL, EDUCATION_LEVELS = [], WORK_MO
       if (filters.country) params.set('country', filters.country)
 
       //Job search endpoint
-      const res = await fetch(`${API_BASE_URL}/search/jobs?${params}`, {
+      const res = await fetch(`${API_BASE_URL}/search?${params}`, {
         credentials: 'include',
       })
       if (res.ok) {

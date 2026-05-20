@@ -33,7 +33,7 @@ function App() {
   const [FIELDS_OF_STUDY, setFieldsOfStudy] = useState([])
   const [WORK_MODES, setWorkModes] = useState([])
   const [EDUCATION_LEVELS, setEducationLevels] = useState([])
-  const [TYPE, setType] = useState('')
+  const [userType, setUserType] = useState(null) 
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
@@ -57,13 +57,15 @@ function App() {
         console.error('Error fetching setup:', error)
       }
     }
+
+    //Load usertype
+    const storedUserType = sessionStorage.getItem('user_type')
+    setUserType(storedUserType)
+
     fetchSetup()
   }, [])
 
   const enumProps = { FIELDS_OF_STUDY, WORK_MODES, EDUCATION_LEVELS, API_BASE_URL }
-
-  // Redirect to correct dashboard / search / recommended based on user_type in sessionStorage
-  // The login + registration flows must write sessionStorage.setItem('user_type', 'seeker'|'company')
 
 
   return (
@@ -73,17 +75,29 @@ function App() {
 
       {/* Auth / onboarding */}
       <Route path="/" element={<AccountType />} />
-      <Route path="/login" element={<Login API_BASE_URL={API_BASE_URL} TYPE={TYPE} setType={setType} />} />
+      <Route path="/login" element={<Login API_BASE_URL={API_BASE_URL} setUserType={setUserType} />} />
       <Route path="/register/:role/step1" element={<RegisterStep1 />} />
       <Route path="/register/employer/step2" element={<EmployerStep2 />} />
       <Route path="/register/employer/step3" element={<EmployerStep3 />} />
       <Route path="/register/:role/step2" element={<RegisterStep2 {...enumProps} />} />
       <Route path="/register/:role/step3" element={<RegisterStep3 API_BASE_URL={API_BASE_URL} />} />
 
-      {/* Shared — renders correct component based on sessionStorage user_type */}
-      <Route path="/dashboard"   element={TYPE === 'company' ? <EmployerDashboard API_BASE_URL={API_BASE_URL} /> : <SeekerDashboard API_BASE_URL={API_BASE_URL} />} />
-      <Route path="/search"      element={TYPE === 'company' ? <CandidateSearch {...enumProps} /> : <JobSearch {...enumProps} />} />
-      <Route path="/recommended" element={TYPE === 'company' ? <RecommendedCandidates API_BASE_URL={API_BASE_URL} /> : <RecommendedJobs API_BASE_URL={API_BASE_URL} />} />
+      {/* Shared — renders correct component based on userType */}
+      <Route path="/dashboard" element={
+          userType === 'company'
+          ? <EmployerDashboard API_BASE_URL={API_BASE_URL} />
+          : <SeekerDashboard API_BASE_URL={API_BASE_URL} />
+      } />
+      <Route path="/search" element={
+        userType === 'company'
+          ? <CandidateSearch {...enumProps} />
+          : <JobSearch {...enumProps} />
+      } />
+      <Route path="/recommended" element={
+        userType === 'company'
+          ? <RecommendedCandidates API_BASE_URL={API_BASE_URL} />
+          : <RecommendedJobs API_BASE_URL={API_BASE_URL} />
+      } />
 
       {/* Seeker only */}
       <Route path="/resume" element={<Resume {...enumProps} />} />

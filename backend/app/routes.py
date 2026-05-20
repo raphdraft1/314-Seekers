@@ -129,8 +129,8 @@ def upgrade():
     if membership is None:
         return jsonify({"error": "Cookie error"}), 401
     
-    #Upgrade membership funct here
-    membership = True
+    #Upgrade membership funct
+    db_DA.upgrade_membership(user_id=session["user_id"], user_type=session["user_type"])
 
     session["membership"] = membership
 
@@ -213,13 +213,15 @@ def get_company():
     return jsonify({"company": company_json})
 
 
-@api.route("/search/jobs", methods=["GET"])
+@api.route("/search", methods=["GET"])
 def get_jobs():
 
     #Extract filter variables from query parameters
     query = request.args.get('q') or None
     work_mode = request.args.get('work_mode')
     education = request.args.get('required_education') or None
+    field_of_study = request.args.get('field_of_study') or None
+    required_skills = request.args.get('required_skills') or None
     experience = request.args.get('exp_years') or None
     city = request.args.get('city') or None
     state = request.args.get('state') or None
@@ -229,40 +231,63 @@ def get_jobs():
     if not isinstance(work_mode, list):
         work_mode = [work_mode] if work_mode else None
 
+    if (session.get("user_type") == "seeker"):
+        #Get matching jobs from database
+        raw_jobs = db_DA.query_jobposting(
+            query_text=query, 
+            required_skills=required_skills, 
+            required_education=education,
+            exp_years=experience, 
+            work_mode=work_mode, 
+            field_of_study=field_of_study, 
+            city=city, 
+            state=state, 
+            country=country)
+        
+        jobs = []
+        for job in raw_jobs:
+            jobs.append({
+                "id": job.id,
+                "city": job.city,
+                "exp_years": job.exp_years,
+                "required_skills": job.required_skills,
+                "state": job.state,
+                "summary": job.summary,
+                "title": job.title,
+                "work_mode": job.work_mode, 
+                "company_name": job.company_name
+            })
 
-    #Get matching jobs from database
-    raw_jobs = db_DA.query_jobposting(
-        query_text=query, 
-        required_skills=None, 
-        required_education=education,
-        exp_years=experience, 
-        work_mode=work_mode, 
-        field_of_study=None, 
-        city=city, 
-        state=state, 
-        country=country)
+        return jsonify({"jobs": jobs})
     
-    jobs = []
-    for job in raw_jobs:
-        jobs.append({
-            "id": job.id,
-            "city": job.city,
-            #"companyId": job.company_id,
-            #"country": job.country,
-            "exp_years": job.exp_years,
-            #"field_of_study": job.field_of_study,
-            #"required_education": job.required_education,
-            "required_skills": job.required_skills,
-            #"responsibilities": job.responsibilities,
-            "state": job.state,
-            "summary": job.summary,
-            "title": job.title,
-            "work_mode": job.work_mode, 
-            "company_name": job.company_name,
-            #"company_email": job.company_email
-        })
+    else:
+        #Get matching resumes from database
+        raw_resumes = db_DA.query_resume(
+            query_text=query, 
+            skills=required_skills, 
+            education=education,
+            exp_years=experience, 
+            work_mode=work_mode, 
+            field_of_study=field_of_study, 
+            preferred_city=city, 
+            preferred_state=state, 
+            preferred_country=country)
+        
+        candidates = []
+        for resume in raw_resumes:
+            candidates.append({
+                "id": resume.id,
+                "seeker_full_name": resume.seeker_full_name, 
+                "preferred_state": resume.preferred_state,
+                "preferred_city": resume.preferred_city,
+                "work_mode": resume.work_mode,
+                "exp_years": resume.exp_years,
+                "skills": resume.skills,
+                "experience": resume.experience
+                
+            })
 
-    return jsonify({"jobs": jobs})
+        return jsonify({"candidates": candidates})
 
 #Gte filter options for search page
 @api.route("/search/filters", methods=["GET"])
@@ -383,7 +408,7 @@ def get_job_recommendations():
 #Employer routes
 
 #Get all employer job postings
-@api.route("/posting", methods=["GET"])
+@api.route("/all_postings", methods=["GET"])
 def get_postings():
     
     postings = db_DA.get_all_jobpostings_by_company(session["user_id"])
@@ -410,3 +435,78 @@ def get_postings():
         })
 
     return jsonify({"postings": postings_json})
+
+#Update job posting
+@api.route("/updatePosting", methods=["PUT"])
+def update_posting():
+    
+    #Extract id 
+    id = request.args.get("jobId") or None
+    if not id:
+        return jsonify({"error": "Job ID is required"}), 400
+
+    data = request.get_json()
+    print(data)
+    db_DA.create_jobposting(
+        company_id=session["user_id"],
+        title=data["title"],
+        summary=data["summary"],
+        responsibilities=data["responsibilities"],
+        required_skills=data["required_skills"],
+        required_education=int(list(data["required_education"].keys())[0]),
+        exp_years=data["exp_years"],
+        work_mode=data["work_mode"],
+        field_of_study=data["field_of_study"],
+        city=data["city"],
+        state=data["state"],
+        country=data["country"]
+    )
+
+    #Delete old posting
+    db_DA.delete_jobposting(id)
+    return jsonify({"message": "Job posting updated successfully"}), 200
+
+#Create new job posting
+@api.route("/newPosting", methods=["POST"])
+def create_posting():
+    #cookie check
+    if "user_id" not in session:
+        return jsonify({"error": "Cookie Error"}), 401
+    
+    data = request.get_json()
+    print (data)
+    if( db_DA.create_jobposting(
+        company_id=session["user_id"],
+        title=data["title"],
+        summary=data["summary"],
+        responsibilities=data["responsibilities"],
+        required_skills=data["required_skills"],
+        required_education=data["required_education"],
+        exp_years=data["exp_years"],
+        work_mode=data["work_mode"],
+        field_of_study=data["field_of_study"],
+        city=data["city"],
+        state=data["state"],
+        country=data["country"]
+    )
+    ):
+        return jsonify({"message": "Job posting created successfully"}), 201
+    else:
+        return jsonify({"error": "Failed to create job posting"}), 500
+
+#Delete job posting
+@api.route("/deletePosting", methods=["DELETE"])
+def delete_posting():
+    #cookie check
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    #Extract id 
+    id = request.args.get("jobId") or None
+    if not id:
+        return jsonify({"error": "Job ID is required"}), 400
+
+    if db_DA.delete_jobposting(id):
+        return jsonify({"message": "Job posting deleted successfully"}), 200
+    else:
+        return jsonify({"error": "Failed to delete job posting"}), 500

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 
-function Login({API_BASE_URL, TYPE, setType}) {
+function Login({API_BASE_URL, setUserType}) {
     const [form, setForm] = useState({ email: '', password: '' })
     const [showPassword, setShowPassword] = useState(false)
     const [errors, setErrors] = useState({})
@@ -24,21 +24,22 @@ function Login({API_BASE_URL, TYPE, setType}) {
         const e = validate()
         if (Object.keys(e).length > 0) { setErrors(e); return }
      
-        //Login check logic here
-        const response = await fetch(`${API_BASE_URL}/login`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({email: form.email, password: form.password}) })
-        
-        //check if login successful and output messages
-        if (response.ok) {
-            const data = await response.json()
-            // Store user_type so App.jsx can route to the correct dashboard
-            // Backend returns 'seeker' or 'company' in the message or a dedicated field
-            const userType = data.type
-            console.log("userType: ", userType)
-            //sessionStorage.setItem('user_type', userType)
-            setType(userType)
-            navigate('/dashboard')
-        } else if (response.status === 401) alert("Invalid email or password")
-        else alert("Server error. Please try again later.")
+        try {
+            const response = await fetch(`${API_BASE_URL}/login`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({email: form.email, password: form.password}) })
+            
+            if (response.ok) {
+                const data = await response.json()
+                const userType = data.type
+                console.log("userType: ", userType)
+                sessionStorage.setItem('user_type', userType)
+                setUserType(userType)
+                navigate('/dashboard')
+            } else if (response.status === 401) alert("Invalid email or password")
+            else alert("Server error. Please try again later.")
+        } catch (error) {
+            console.error('Login error:', error)
+            alert('Network error. Please try again later.')
+        }
     }
  
    const EyeIcon = ({ visible }) => (
