@@ -762,7 +762,7 @@ class DataAccess:
                     "per_page": 20,
                     "include_fields": "$companies(company_name, email)"
             }]})
-            print (result)
+            
             jobposting_list = self._json_to_jobposting_list(result["results"][0])
             return jobposting_list
         return []
