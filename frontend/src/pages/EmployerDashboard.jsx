@@ -23,13 +23,12 @@ export default function EmployerDashboard({ API_BASE_URL }) {
           navigate('/')
         }
 
-        // TODO: Backend needs GET /jobpostings/mine for employer's own postings
-        const jobsRes = await fetch(`${API_BASE_URL}/jobpostings/mine`, {
+        const jobsRes = await fetch(`${API_BASE_URL}/all_postings`, {
           credentials: 'include',
         })
         if (jobsRes.ok) {
           const data = await jobsRes.json()
-          setJobPostings(data.jobpostings || [])
+          setJobPostings(data.postings || [])
         }
 
         // TODO: Backend needs GET /recommendations/candidates?jobposting_id=X
@@ -57,7 +56,7 @@ export default function EmployerDashboard({ API_BASE_URL }) {
         <div className="dash-welcome">
           <div>
             <h1 className="dash-welcome-title">
-              Welcome back{company ? `, ${company.company_name}` : ''}! 🏢
+              Welcome back{company ? `, ${company.name}` : ''}! 🏢
             </h1>
             <p className="dash-welcome-sub">Manage your job postings and find top candidates.</p>
           </div>

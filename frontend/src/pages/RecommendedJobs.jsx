@@ -37,7 +37,8 @@ export default function RecommendedJobs({ API_BASE_URL }) {
     setLoading(true)
     try {
       // TODO: Backend needs GET /recommendations/jobs?page=X
-      const res = await fetch(`${API_BASE_URL}/recommendations/jobs?page=${pageNum}`, {
+      const res = await fetch(`${API_BASE_URL}/recommendations/jobs?page=${pageNum}`, { 
+        method: 'POST',
         credentials: 'include',
       })
       if (res.ok) {
@@ -71,7 +72,7 @@ export default function RecommendedJobs({ API_BASE_URL }) {
           {!isMember && (
             <div className="membership-cta">
               <span>🔒 Free plan: Top 10 matches</span>
-              {/* TODO: wire to membership upgrade flow */}
+              
               <button className="btn-primary" style={{ marginLeft: 12 }} onClick={toggleMembership}>
                 Upgrade
               </button>

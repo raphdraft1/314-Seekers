@@ -26,7 +26,7 @@ export default function SeekerDashboard({ API_BASE_URL }) {
         }
 
         // Fetch 3 job postings 
-        const jobsRes = await fetch(`${API_BASE_URL}/search/jobs`, {
+        const jobsRes = await fetch(`${API_BASE_URL}/search`, {
           credentials: 'include',
         })
         if (jobsRes.ok) {
@@ -44,6 +44,7 @@ export default function SeekerDashboard({ API_BASE_URL }) {
       try {
         // Get 3 recommendations
         const res = await fetch(`${API_BASE_URL}/recommendations/jobs`, {
+          method: 'POST',
           credentials: 'include',
         })
         if (res.ok) {

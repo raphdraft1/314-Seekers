@@ -130,22 +130,29 @@ def upgrade():
         return jsonify({"error": "Cookie error"}), 401
     
     #Upgrade membership funct
-    db_DA.upgrade_membership(user_id=session["user_id"], user_type=session["user_type"])
+    db_DA.update_membership(user_id=session["user_id"], user_type=session["user_type"])
 
-    session["membership"] = membership
+    session["membership"] = True
 
-    return jsonify({"membership": membership})
+    return jsonify({"membership": session["membership"]})
 
 
 #Get resume data for seeker
-@api.route("/resume", methods=["GET"])
+@api.route("/resume", methods=["POST"])
 def get_resume():
-    resumes = db_DA.get_all_resumes_by_seeker(seeker_id=session["user_id"])
+
+    if session.get("user_type") != "seeker":
+        data = request.get_json()
+        resumes = db_DA.get_all_resumes_by_seeker(seeker_id=data.get("seeker_id"))  
+    else:
+        resumes = db_DA.get_all_resumes_by_seeker(seeker_id=session["user_id"])
 
     resumes_json = []
     for resume in resumes:
         resumes_json.append({
             "id": resume.id,
+            "seeker_full_name": resume.seeker_full_name,
+            "email": resume.seeker_email,
             "seeker_id": resume.seeker_id,
             "education": resume.education,
             "experience": resume.experience,
@@ -344,7 +351,7 @@ def get_jobposting():
 
     return jsonify({"job": job})
 
-@api.route("/recommendations/jobs", methods=["GET"])
+@api.route("/recommendations/jobs", methods=["POST"])
 def get_job_recommendations():
     
     #Extract page 
@@ -510,3 +517,46 @@ def delete_posting():
         return jsonify({"message": "Job posting deleted successfully"}), 200
     else:
         return jsonify({"error": "Failed to delete job posting"}), 500
+    
+
+#Get recommended candidates by jobposting
+@api.route("/recommendations/candidates", methods=["POST"])
+def get_candidate_recommendations():
+
+    #Extract and validate data
+    data = request.get_json()
+    page = int(data.get("page")) or 1
+    jobId = data.get("jobposting_id")
+    membership = session.get("membership")
+    if not jobId:
+        return jsonify({"error": "Cookie Error"}), 403
+
+    #Get recommendations
+    rawCandidates = db_DA.rank_resumes_by_jobposting(jobId, page)
+    if not rawCandidates:
+        return jsonify({"error": "No recommendations found for the given page"}), 404
+    
+    candidates = []
+    #Convert format to JSONifyable
+    for rawCandidate in rawCandidates:
+        
+        candidates.append({
+            "id": rawCandidate.id,
+            "seeker_full_name": rawCandidate.seeker_full_name, 
+            "preferred_state": rawCandidate.preferred_state,
+            "preferred_city": rawCandidate.preferred_city,        
+            "work_mode": rawCandidate.work_mode,
+            "exp_years": rawCandidate.exp_years,
+            "skills": rawCandidate.skills,
+            "experience": rawCandidate.experience
+        })
+
+    
+    #check if there are other pages
+    nextCandidates = db_DA.rank_resumes_by_jobposting(jobId, page + 1)
+    if nextCandidates is []:
+        hasNext = False
+    else:
+        hasNext = True
+
+    return jsonify({"candidates": candidates, "hasMore": hasNext, "membership": membership})

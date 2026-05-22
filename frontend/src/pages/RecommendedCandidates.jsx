@@ -17,13 +17,13 @@ export default function RecommendedCandidates({ API_BASE_URL }) {
     // Load employer's job postings so they can pick which one to get candidates for
     const fetchJobs = async () => {
       try {
-        // TODO: Backend needs GET /jobpostings/mine
-        const res = await fetch(`${API_BASE_URL}/jobpostings/mine`, { credentials: 'include' })
+      
+        const res = await fetch(`${API_BASE_URL}/all_postings`, { credentials: 'include' })
         if (res.ok) {
           const data = await res.json()
-          setJobPostings(data.jobpostings || [])
-          if (data.jobpostings?.length > 0) {
-            setSelectedJob(data.jobpostings[0].id)
+          setJobPostings(data.postings || [])
+          if (data.postings?.length > 0) {
+            setSelectedJob(data.postings[0].id)
           }
         }
       } catch (err) {
@@ -39,21 +39,39 @@ export default function RecommendedCandidates({ API_BASE_URL }) {
     if (selectedJob) fetchCandidates(1)
   }, [selectedJob])
 
+  //Change membership
+  const toggleMembership = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/membership`, {
+        method: 'POST',
+        credentials: 'include'
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setIsMember(data.membership || false)
+        console.log('Membership status:', data.membership)
+        fetchCandidates(1)
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   const fetchCandidates = async (pageNum) => {
     if (!selectedJob) return
     setLoading(true)
     try {
-      // TODO: Backend needs GET /recommendations/candidates?jobposting_id=X&page=Y
+     
       const res = await fetch(
-        `${API_BASE_URL}/recommendations/candidates?jobposting_id=${selectedJob}&page=${pageNum}`,
-        { credentials: 'include' }
+        `${API_BASE_URL}/recommendations/candidates`,
+        { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jobposting_id: selectedJob, page: pageNum }) }
       )
       if (res.ok) {
         const data = await res.json()
-        const newCandidates = data.resumes || []
+        const newCandidates = data.candidates || []
         setCandidates(prev => pageNum === 1 ? newCandidates : [...prev, ...newCandidates])
-        setHasMore(data.has_more || false)
-        setIsMember(data.is_member || false)
+        setHasMore(data.hasMore || false)
+        setIsMember(data.membership || false)
         setPage(pageNum)
       }
     } catch (err) {
@@ -81,7 +99,9 @@ export default function RecommendedCandidates({ API_BASE_URL }) {
           {!isMember && (
             <div className="membership-cta">
               <span>🔒 Free plan: Top 10 matches</span>
-              <button className="btn-primary" style={{ marginLeft: 12 }}>Upgrade</button>
+              <button className="btn-primary" style={{ marginLeft: 12 }} onClick={toggleMembership}>
+                Upgrade
+              </button>
             </div>
           )}
         </div>
@@ -138,12 +158,12 @@ export default function RecommendedCandidates({ API_BASE_URL }) {
                     )}
                     {r.experience && <p className="job-card-summary">{r.experience.slice(0, 140)}…</p>}
                   </div>
-                  {r.match_score != null && (
+                  {/* {r.match_score != null && (
                     <div className="job-card-match">
                       <span className="match-pct">{Math.round(r.match_score * 100)}%</span>
                       <span className="match-label">match</span>
                     </div>
-                  )}
+                  )} */}
                 </div>
               ))}
             </div>

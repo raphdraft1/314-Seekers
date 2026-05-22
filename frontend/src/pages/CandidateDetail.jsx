@@ -13,12 +13,17 @@ export default function CandidateDetail({ API_BASE_URL }) {
     const fetchCandidate = async () => {
       try {
         // API call to fetch candidate resume by ID (Needs a route to get_resume_by_id)
-        const res = await fetch(`${API_BASE_URL}/resume/${candidateId}`, {
+        const res = await fetch(`${API_BASE_URL}/resume`, {
+          method: "POST",
           credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ seeker_id: candidateId })
         })
         if (res.ok) {
           const data = await res.json()
-          setResume(data.resume)
+          setResume(data.resumes[0])
         } else {
           setError('Candidate profile not found.')
         }
@@ -57,6 +62,9 @@ export default function CandidateDetail({ API_BASE_URL }) {
             {/* Header */}
             <h1 className="dash-welcome-title" style={{ marginBottom: 4 }}>
               {resume.seeker_full_name || 'Candidate'}
+              {resume.email && (
+              <p className="job-card-company" style={{ fontSize: 14, marginBottom: 16 }}>{resume.email}</p>
+            )}
             </h1>
             {/* Meta row */}
             <div className="job-card-meta" style={{ marginBottom: 20 }}>

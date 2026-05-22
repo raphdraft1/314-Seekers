@@ -178,6 +178,7 @@ export default function Resume( {FIELDS_OF_STUDY = [], WORK_MODES = [], EDUCATIO
 
       //Get resume data
       const resumeResponse = await fetch(`${API_BASE_URL}/resume`, {
+        method: 'POST',
         credentials: 'include'
       })
       if (resumeResponse.ok) {
