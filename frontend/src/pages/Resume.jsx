@@ -187,13 +187,19 @@ export default function Resume({ FIELDS_OF_STUDY = [], WORK_MODES = [], EDUCATIO
   const handleUpdate = async (section, fields) => {
     setSaving(prev => ({ ...prev, [section]: true }))
     try {
-      const res = await fetch(`${API_BASE_URL}/resume/${resume.resumeId}`, {
-        method: 'PATCH', credentials: 'include',
+      const res = await fetch(`${API_BASE_URL}/updateResume`, {
+        method: 'PUT', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(fields),
+        body: JSON.stringify({ "fields": fields, "resumeId": resume.resumeId }),
       })
-      if (!res.ok) throw new Error('Save failed')
+      if (!res.ok){
+       throw new Error('Save failed')
+      }else{
+        alert('Saved successfully')
+      }
+
       flashSaved(section)
+      
     } catch {
       alert('Failed to save. Please try again.')
     } finally {

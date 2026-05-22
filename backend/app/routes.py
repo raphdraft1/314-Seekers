@@ -167,6 +167,42 @@ def get_resume():
 
     return jsonify({"resumes": resumes_json})
 
+
+#Update resume
+@api.route("/updateResume", methods=["PUT"])
+def update_resume():
+    
+    #Extract id 
+    uid = session.get("user_id") or None
+    if not uid:
+        return jsonify({"error": "Cookie Error"}), 400
+
+    data = request.get_json()
+
+    #Get resume ID
+    id = data.get("resumeId") or None
+    if not id:
+        return jsonify({"error": "Resume ID is required"}), 400
+
+    resume = data.get("fields") or None
+    db_DA.create_resume(
+        seeker_id=session["user_id"],
+        education=int(list(resume["education"].keys())[0]),
+        experience=resume["experience"],
+        skills=resume["skills"],
+        exp_years=resume["exp_years"],
+        work_mode=resume["work_mode"],
+        field_of_study=resume["field_of_study"],
+        preferred_city=resume["preferred_city"],
+        preferred_state=resume["preferred_state"],
+        preferred_country=resume["preferred_country"]
+    )
+
+    #Delete old resume
+    db_DA.delete_resume(id)
+    return jsonify({"message": "Resume updated successfully"}), 200
+
+
 #Get seeker data
 @api.route("/getSeeker", methods=["POST"])
 def get_seeker():
