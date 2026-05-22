@@ -37,9 +37,11 @@ export default function RecommendedJobs({ API_BASE_URL }) {
     setLoading(true)
     try {
       // TODO: Backend needs GET /recommendations/jobs?page=X
-      const res = await fetch(`${API_BASE_URL}/recommendations/jobs?page=${pageNum}`, { 
+      const res = await fetch(`${API_BASE_URL}/recommendations/jobs`, { 
         method: 'POST',
         credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page: pageNum })
       })
       if (res.ok) {
         const data = await res.json()

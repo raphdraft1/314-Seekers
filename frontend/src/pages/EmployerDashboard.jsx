@@ -12,6 +12,7 @@ export default function EmployerDashboard({ API_BASE_URL }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        let jobId = null
         const companyRes = await fetch(`${API_BASE_URL}/getCompany`, {
           method: 'POST',
           credentials: 'include',
@@ -29,15 +30,19 @@ export default function EmployerDashboard({ API_BASE_URL }) {
         if (jobsRes.ok) {
           const data = await jobsRes.json()
           setJobPostings(data.postings || [])
+          jobId = (data.postings || [])[0]?.id
         }
 
         // TODO: Backend needs GET /recommendations/candidates?jobposting_id=X
         const recRes = await fetch(`${API_BASE_URL}/recommendations/candidates`, {
+          method: 'POST',
           credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ "jobposting_id": jobId, "page": 1 }),
         })
         if (recRes.ok) {
           const data = await recRes.json()
-          setRecommended((data.resumes || []).slice(0, 3))
+          setRecommended((data.candidates || []).slice(0, 3))
         }
       } catch (err) {
         console.error(err)
@@ -69,7 +74,7 @@ export default function EmployerDashboard({ API_BASE_URL }) {
           {/* Recommended Candidates */}
           <div className="dash-widget dash-widget-wide">
             <div className="dash-widget-header">
-              <h2 className="dash-widget-title">Top Candidates</h2>
+              <h2 className="dash-widget-title">Top Candidates For {jobPostings[0]?.title || 'Your Job Postings'}</h2>
               <button className="dash-widget-link" onClick={() => navigate('/recommended')}>
                 View all →
               </button>

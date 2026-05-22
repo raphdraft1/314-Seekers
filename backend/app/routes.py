@@ -354,14 +354,9 @@ def get_jobposting():
 @api.route("/recommendations/jobs", methods=["POST"])
 def get_job_recommendations():
     
-    #Extract page 
-    if "page" in request.args:
-        try:
-            page = int(request.args.get("page"))
-        except ValueError:
-            return jsonify({"error": "Invalid page number"}), 400
-    else:
-        page = 1 
+    #Extract and validate data
+    data = request.get_json()
+    page = int(data.get("page")) if data.get("page") else 1
 
     #Extract resume ID and membership from user profile
     userId = session.get("user_id")
@@ -522,14 +517,14 @@ def delete_posting():
 #Get recommended candidates by jobposting
 @api.route("/recommendations/candidates", methods=["POST"])
 def get_candidate_recommendations():
-
+    
     #Extract and validate data
     data = request.get_json()
-    page = int(data.get("page")) or 1
+    page = int(data.get("page")) if data.get("page") else 1
     jobId = data.get("jobposting_id")
     membership = session.get("membership")
     if not jobId:
-        return jsonify({"error": "Cookie Error"}), 403
+        return jsonify({"error": "No Job ID provided"}), 403
 
     #Get recommendations
     rawCandidates = db_DA.rank_resumes_by_jobposting(jobId, page)

@@ -46,6 +46,8 @@ export default function SeekerDashboard({ API_BASE_URL }) {
         const res = await fetch(`${API_BASE_URL}/recommendations/jobs`, {
           method: 'POST',
           credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ page: 1 })
         })
         if (res.ok) {
           const data = await res.json()
