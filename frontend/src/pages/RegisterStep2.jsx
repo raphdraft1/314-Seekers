@@ -71,7 +71,7 @@ function MultiSelectDropdown({ options, selected, onToggle }) {
         <span className="multiselect-arrow">▼</span>
       </div>
       {open && createPortal(
-        <div style={dropdownStyle}>
+        <div style={dropdownStyle} onMouseDown={e => e.stopPropagation()}>
           {options.map(f => (
             <label key={f} className="dropdown-option">
               <input type="checkbox" checked={selected.includes(f)} onChange={() => onToggle(f)} />

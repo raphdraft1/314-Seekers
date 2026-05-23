@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import DashNav from '../components/DashNav'
 
-export default function CandidateSearch({ API_BASE_URL, EDUCATION_LEVELS = [], WORK_MODES = [] }) {
+export default function CandidateSearch({ API_BASE_URL, EDUCATION_LEVELS = [], WORK_MODES = [], FIELDS_OF_STUDY = [] }) {
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState([])
@@ -15,7 +15,9 @@ export default function CandidateSearch({ API_BASE_URL, EDUCATION_LEVELS = [], W
   const [skill, setSkill] = useState([])
   const [filters, setFilters] = useState({
     work_mode: [],
-    education: '',
+    required_education: '',
+    field_of_study: '',
+    required_skills: '',
     exp_years: '',
     preferred_city: '',
     preferred_state: '',
@@ -52,7 +54,9 @@ export default function CandidateSearch({ API_BASE_URL, EDUCATION_LEVELS = [], W
       const params = new URLSearchParams()
       if (query.trim()) params.set('q', query.trim())
       if (filters.work_mode.length) params.set('work_mode', filters.work_mode.join(','))
-      if (filters.education) params.set('education', filters.education)
+      if (filters.required_education) params.set('required_education', filters.required_education)
+      if (filters.field_of_study) params.set('field_of_study', filters.field_of_study)
+      if (filters.required_skills) params.set('required_skills', filters.required_skills)
       if (filters.exp_years) params.set('exp_years', filters.exp_years)
       if (filters.preferred_city) params.set('city', filters.preferred_city)
       if (filters.preferred_state) params.set('state', filters.preferred_state)
@@ -74,11 +78,13 @@ export default function CandidateSearch({ API_BASE_URL, EDUCATION_LEVELS = [], W
   }
 
   const clearFilters = () =>
-    setFilters({ work_mode: [], education: '', exp_years: '', preferred_city: '', preferred_state: '', preferred_country: '' })
+    setFilters({ work_mode: [], required_education: '', field_of_study: '', required_skills: '', exp_years: '', preferred_city: '', preferred_state: '', preferred_country: '' })
 
   const activeFilterCount = [
     filters.work_mode.length > 0,
-    !!filters.education,
+    !!filters.required_education,
+    !!filters.field_of_study,
+    !!filters.required_skills,
     !!filters.exp_years,
     !!filters.preferred_city || !!filters.preferred_state || !!filters.preferred_country,
   ].filter(Boolean).length
@@ -153,6 +159,32 @@ export default function CandidateSearch({ API_BASE_URL, EDUCATION_LEVELS = [], W
                   <option value="">Any</option>
                   {EDUCATION_LEVELS.map(l => (
                     <option key={l.value} value={l.value}>{l.label}</option>
+                  ))}
+                </select>
+              </FilterSection>
+
+              <FilterSection title="Field of Study">
+                <select
+                  className="field-select"
+                  value={filters.field_of_study}
+                  onChange={e => setFilters(f => ({ ...f, field_of_study: e.target.value }))}
+                >
+                  <option value="">Any</option>
+                  {FIELDS_OF_STUDY.map(f => (
+                    <option key={f} value={f}>{f}</option>
+                  ))}
+                </select>
+              </FilterSection>
+
+              <FilterSection title="Skill">
+                <select
+                  className="field-select"
+                  value={filters.required_skills}
+                  onChange={e => setFilters(f => ({ ...f, required_skills: e.target.value }))}
+                >
+                  <option value="">Any</option>
+                  {skill.map(s => (
+                    <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
               </FilterSection>

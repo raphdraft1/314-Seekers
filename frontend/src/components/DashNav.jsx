@@ -34,7 +34,6 @@ export default function DashNav({ activePage = 'home', userType = 'seeker' }) {
           <span className="navbar-logo-text">Seekers</span>
         </div>
         <div className="dashnav-actions">
-          <button className="dashnav-btn" onClick={() => navigate('/account')}>Account</button>
           <button className="dashnav-btn dashnav-btn-outline" onClick={handleLogout}>Log out</button>
         </div>
       </div>

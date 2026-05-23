@@ -187,7 +187,7 @@ def update_resume():
     resume = data.get("fields") or None
     db_DA.create_resume(
         seeker_id=session["user_id"],
-        education=int(list(resume["education"].keys())[0]),
+        education=int(resume["education"]),
         experience=resume["experience"],
         skills=resume["skills"],
         exp_years=resume["exp_years"],

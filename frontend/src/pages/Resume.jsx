@@ -20,7 +20,6 @@ const PLACEHOLDER_RESUME = {
   preferredCountry: '',
 }
 
-// ─── REUSABLE COMPONENTS ──────────────────────────────────────
 function Section({ title, isOpen, onToggle, children }) {
   return (
     <div className={`resume-section ${isOpen ? 'open' : ''}`}>
@@ -39,14 +38,6 @@ function Field({ label, children }) {
       <label className="field-label">{label}</label>
       {children}
     </div>
-  )
-}
-
-function UpdateButton({ onClick, loading }) {
-  return (
-    <button className="btn-update" onClick={onClick} disabled={loading}>
-      {loading ? 'Saving...' : 'Update'}
-    </button>
   )
 }
 
@@ -128,12 +119,11 @@ function FieldSelect({ options, selected, onChange }) {
   )
 }
 
-// ─── MAIN PAGE ────────────────────────────────────────────────
 export default function Resume({ FIELDS_OF_STUDY = [], WORK_MODES = [], EDUCATION_LEVELS = [], API_BASE_URL }) {
   const navigate = useNavigate()
   const [openSection, setOpenSection] = useState('education')
-  const [saving, setSaving] = useState({})
-  const [saved, setSaved] = useState({})
+  const [saving, setSaving] = useState(false)
+  const [apiError, setApiError] = useState('')
 
   const [seeker, setSeeker] = useState(PLACEHOLDER_SEEKER)
   const [resume, setResume] = useState(PLACEHOLDER_RESUME)
@@ -152,13 +142,13 @@ export default function Resume({ FIELDS_OF_STUDY = [], WORK_MODES = [], EDUCATIO
         })
       }
 
-      const resumeResponse = await fetch(`${API_BASE_URL}/resume`, { method: 'POST',credentials: 'include' })
+      const resumeResponse = await fetch(`${API_BASE_URL}/resume`, { method: 'POST', credentials: 'include' })
       if (resumeResponse.ok) {
         const data = await resumeResponse.json()
         const resumeData = data.resumes[0]
         const mappedResume = {
           resumeId:         resumeData.id,
-          education:        resumeData.education,
+          education:        parseInt(Object.keys(resumeData.education)[0]),
           fieldOfStudy:     resumeData.field_of_study || [],
           skills:           resumeData.skills || [],
           expYears:         resumeData.exp_years,
@@ -176,42 +166,42 @@ export default function Resume({ FIELDS_OF_STUDY = [], WORK_MODES = [], EDUCATIO
   }, [])
 
   const toggleSection = (id) => setOpenSection(prev => prev === id ? null : id)
-
   const updateResume = (key, val) => setResume(prev => ({ ...prev, [key]: val }))
 
-  const flashSaved = (key) => {
-    setSaved(prev => ({ ...prev, [key]: true }))
-    setTimeout(() => setSaved(prev => ({ ...prev, [key]: false })), 2000)
-  }
-
-  const handleUpdate = async (section, fields) => {
-    setSaving(prev => ({ ...prev, [section]: true }))
+  const handleSubmit = async () => {
+    setSaving(true)
+    setApiError('')
     try {
       const res = await fetch(`${API_BASE_URL}/updateResume`, {
-        method: 'PUT', credentials: 'include',
+        method: 'PUT',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ "fields": fields, "resumeId": resume.resumeId }),
+        body: JSON.stringify({
+          fields: {
+            education:        resume.education,
+            field_of_study:   resume.fieldOfStudy,
+            skills:           resume.skills,
+            exp_years:        parseInt(resume.expYears) || 0,
+            experience:       resume.experience,
+            work_mode:        resume.workModes,
+            preferred_city:   resume.preferredCity,
+            preferred_state:  resume.preferredState,
+            preferred_country: resume.preferredCountry,
+          },
+          resumeId: resume.resumeId,
+        }),
       })
-      if (!res.ok){
-       throw new Error('Save failed')
-      }else{
-        alert('Saved successfully')
-      }
-
-      flashSaved(section)
-      
+      if (!res.ok) throw new Error('Save failed')
+      setOriginalResume(resume)
+      navigate('/dashboard')
     } catch {
-      alert('Failed to save. Please try again.')
+      setApiError('Failed to save. Please try again.')
     } finally {
-      setSaving(prev => ({ ...prev, [section]: false }))
+      setSaving(false)
     }
   }
 
   const handleReset = () => setResume(originalResume)
-
-  const SaveIndicator = ({ field }) => saved[field]
-    ? <span className="save-indicator">✓ Saved</span>
-    : null
 
   return (
     <div className="page">
@@ -227,113 +217,55 @@ export default function Resume({ FIELDS_OF_STUDY = [], WORK_MODES = [], EDUCATIO
             <span>Email: {seeker.email || '—'}</span>
           </div>
 
+          {apiError && <div className="api-error" style={{ marginBottom: 16 }}>{apiError}</div>}
+
           {/* ── EDUCATION ── */}
           <Section title="Education" isOpen={openSection === 'education'} onToggle={() => toggleSection('education')}>
-
-            <div className="update-row" style={{ overflow: 'visible' }}>
-              <Field label="Education Level">
-                <select className="field-select" value={resume.education} onChange={e => updateResume('education', parseInt(e.target.value))}>
-                  {EDUCATION_LEVELS.map(l => (
-                    <option key={l.value} value={l.value}>{l.value} — {l.label}</option>
-                  ))}
-                </select>
-              </Field>
-              <div className="update-col">
-                <SaveIndicator field="education" />
-                <UpdateButton loading={saving.education} onClick={() => handleUpdate('education', { education: resume.education })} />
-              </div>
-            </div>
-
-            <div className="update-row" style={{ overflow: 'visible' }}>
-              <Field label="Field of Study">
-                <FieldSelect options={FIELDS_OF_STUDY} selected={resume.fieldOfStudy} onChange={val => updateResume('fieldOfStudy', val)} />
-              </Field>
-              <div className="update-col">
-                <SaveIndicator field="fieldOfStudy" />
-                <UpdateButton loading={saving.fieldOfStudy} onClick={() => handleUpdate('fieldOfStudy', { field_of_study: resume.fieldOfStudy })} />
-              </div>
-            </div>
-
+            <Field label="Education Level">
+              <select className="field-select" value={resume.education} onChange={e => updateResume('education', parseInt(e.target.value))}>
+                {EDUCATION_LEVELS.map(l => (
+                  <option key={l.value} value={l.value}>{l.value} — {l.label}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Field of Study">
+              <FieldSelect options={FIELDS_OF_STUDY} selected={resume.fieldOfStudy} onChange={val => updateResume('fieldOfStudy', val)} />
+            </Field>
           </Section>
 
           {/* ── EMPLOYMENT HISTORY ── */}
           <Section title="Employment History" isOpen={openSection === 'employment'} onToggle={() => toggleSection('employment')}>
-
-            <div className="update-row">
-              <Field label="Skills">
-                <TagInput tags={resume.skills} onChange={val => updateResume('skills', val)} placeholder="Type a skill and press Enter..." />
-              </Field>
-              <div className="update-col">
-                <SaveIndicator field="skills" />
-                <UpdateButton loading={saving.skills} onClick={() => handleUpdate('skills', { skills: resume.skills })} />
-              </div>
-            </div>
-
-            <div className="update-row">
-              <Field label="Years of Experience">
-                <input className="field-input" value={resume.expYears} onChange={e => updateResume('expYears', e.target.value)} placeholder="e.g. 3" type="number" min="0" max="60" style={{ maxWidth: '160px' }} />
-              </Field>
-              <div className="update-col">
-                <SaveIndicator field="expYears" />
-                <UpdateButton loading={saving.expYears} onClick={() => handleUpdate('expYears', { exp_years: parseInt(resume.expYears) })} />
-              </div>
-            </div>
-
-            <div className="update-row">
-              <Field label="Experience">
-                <textarea className="field-textarea" rows={5} value={resume.experience} onChange={e => updateResume('experience', e.target.value)} placeholder="Describe your work experience..." />
-              </Field>
-              <div className="update-col">
-                <SaveIndicator field="experience" />
-                <UpdateButton loading={saving.experience} onClick={() => handleUpdate('experience', { experience: resume.experience })} />
-              </div>
-            </div>
-
+            <Field label="Skills">
+              <TagInput tags={resume.skills} onChange={val => updateResume('skills', val)} placeholder="Type a skill and press Enter..." />
+            </Field>
+            <Field label="Years of Experience">
+              <input className="field-input" value={resume.expYears} onChange={e => updateResume('expYears', e.target.value)} placeholder="e.g. 3" type="number" min="0" max="60" style={{ maxWidth: '160px' }} />
+            </Field>
+            <Field label="Experience">
+              <textarea className="field-textarea" rows={5} value={resume.experience} onChange={e => updateResume('experience', e.target.value)} placeholder="Describe your work experience..." />
+            </Field>
           </Section>
 
           {/* ── OTHER ── */}
           <Section title="Other" isOpen={openSection === 'other'} onToggle={() => toggleSection('other')}>
-
-            <div className="update-row">
-              <Field label="Work Mode">
-                <MultiCheckbox options={WORK_MODES} selected={resume.workModes} onChange={val => updateResume('workModes', val)} />
-              </Field>
-              <div className="update-col">
-                <SaveIndicator field="workModes" />
-                <UpdateButton loading={saving.workModes} onClick={() => handleUpdate('workModes', { work_mode: resume.workModes })} />
+            <Field label="Work Mode">
+              <MultiCheckbox options={WORK_MODES} selected={resume.workModes} onChange={val => updateResume('workModes', val)} />
+            </Field>
+            <Field label="Preferred Location">
+              <div className="field-row">
+                <input className="field-input" value={resume.preferredCity} onChange={e => updateResume('preferredCity', e.target.value)} placeholder="City" />
+                <input className="field-input" value={resume.preferredState} onChange={e => updateResume('preferredState', e.target.value)} placeholder="State" />
+                <input className="field-input" value={resume.preferredCountry} onChange={e => updateResume('preferredCountry', e.target.value)} placeholder="Country" />
               </div>
-            </div>
-
-            <div className="update-row">
-              <div style={{ flex: 1 }}>
-                <Field label="Preferred Location">
-                  <div className="field-row">
-                    <input className="field-input" value={resume.preferredCity} onChange={e => updateResume('preferredCity', e.target.value)} placeholder="City" />
-                    <input className="field-input" value={resume.preferredState} onChange={e => updateResume('preferredState', e.target.value)} placeholder="State" />
-                    <input className="field-input" value={resume.preferredCountry} onChange={e => updateResume('preferredCountry', e.target.value)} placeholder="Country" />
-                  </div>
-                </Field>
-              </div>
-              <div className="update-col">
-                <SaveIndicator field="preferredLocation" />
-                <UpdateButton loading={saving.preferredLocation} onClick={() => handleUpdate('preferredLocation', { preferred_city: resume.preferredCity, preferred_state: resume.preferredState, preferred_country: resume.preferredCountry })} />
-              </div>
-            </div>
-
+            </Field>
           </Section>
 
-          {/* ── FOOTER BUTTONS ── */}
+          {/* ── FOOTER ── */}
           <div className="resume-footer">
             <button className="btn-secondary" onClick={handleReset}>Reset</button>
             <button className="btn-secondary" onClick={() => navigate('/dashboard')}>Cancel</button>
-            <button className="btn-primary" onClick={() => handleUpdate('all', {
-              education: resume.education, field_of_study: resume.fieldOfStudy,
-              skills: resume.skills, exp_years: parseInt(resume.expYears),
-              experience: resume.experience, work_mode: resume.workModes,
-              preferred_city: resume.preferredCity, preferred_state: resume.preferredState,
-              preferred_country: resume.preferredCountry,
-            })}>
-              {saving.all ? 'Saving...' : 'Save All'}
+            <button className="btn-primary" onClick={handleSubmit} disabled={saving}>
+              {saving ? 'Saving…' : 'Save'}
             </button>
           </div>
 
