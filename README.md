@@ -52,13 +52,13 @@ The below step-by-step instructions demonstrate the build process and execution 
 2. In the directory, create a docker compose configuration file named `docker-compose.yml`. Paste the following contents into the file and save it:
     ```
     services:
-    typesense:
+      typesense:
         image: typesense/typesense:30.1
         restart: on-failure
         ports:
-        - "8108:8108"
+          - "8108:8108"
         volumes:
-        - ./typesense-data:/data
+          - ./typesense-data:/data
         command: '--data-dir /data --api-key=anysecretkeyofchoice --enable-cors'
     ```
     Ensure that the value of `--api-key` matches the value of `TYPESENSE_API_KEY` defined previously in **Environment Configuration**.
