@@ -256,6 +256,7 @@ def get_company():
     return jsonify({"company": company_json})
 
 
+
 @api.route("/search", methods=["GET"])
 def get_jobs():
 
@@ -270,9 +271,20 @@ def get_jobs():
     state = request.args.get('state') or None
     country = request.args.get('country') or None
 
-    #Require work mode in array
-    if not isinstance(work_mode, list):
-        work_mode = [work_mode] if work_mode else None
+    #Require work mode, skills, field_of_study in array
+    def split_csv(value):
+        if not value:
+            return None
+        if isinstance(value, list):
+            items = value
+        else:
+            items = value.split(',')
+        cleaned = [item.strip() for item in items if item and item.strip()]
+        return cleaned or None
+
+    work_mode = split_csv(work_mode)
+    required_skills = split_csv(required_skills)
+    field_of_study = split_csv(field_of_study)
 
     if (session.get("user_type") == "seeker"):
         #Get matching jobs from database

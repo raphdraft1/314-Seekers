@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import DashNav from '../components/DashNav'
 
@@ -16,8 +16,8 @@ export default function CandidateSearch({ API_BASE_URL, EDUCATION_LEVELS = [], W
   const [filters, setFilters] = useState({
     work_mode: [],
     required_education: '',
-    field_of_study: '',
-    required_skills: '',
+    field_of_study: [],
+    required_skills: [],
     exp_years: '',
     preferred_city: '',
     preferred_state: '',
@@ -55,8 +55,8 @@ export default function CandidateSearch({ API_BASE_URL, EDUCATION_LEVELS = [], W
       if (query.trim()) params.set('q', query.trim())
       if (filters.work_mode.length) params.set('work_mode', filters.work_mode.join(','))
       if (filters.required_education) params.set('required_education', filters.required_education)
-      if (filters.field_of_study) params.set('field_of_study', filters.field_of_study)
-      if (filters.required_skills) params.set('required_skills', filters.required_skills)
+      if (filters.field_of_study.length) params.set('field_of_study', filters.field_of_study.join(','))
+      if (filters.required_skills.length) params.set('required_skills', filters.required_skills.join(','))
       if (filters.exp_years) params.set('exp_years', filters.exp_years)
       if (filters.preferred_city) params.set('city', filters.preferred_city)
       if (filters.preferred_state) params.set('state', filters.preferred_state)
@@ -78,13 +78,13 @@ export default function CandidateSearch({ API_BASE_URL, EDUCATION_LEVELS = [], W
   }
 
   const clearFilters = () =>
-    setFilters({ work_mode: [], required_education: '', field_of_study: '', required_skills: '', exp_years: '', preferred_city: '', preferred_state: '', preferred_country: '' })
+    setFilters({ work_mode: [], required_education: '', field_of_study: [], required_skills: [], exp_years: '', preferred_city: '', preferred_state: '', preferred_country: '' })
 
   const activeFilterCount = [
     filters.work_mode.length > 0,
     !!filters.required_education,
-    !!filters.field_of_study,
-    !!filters.required_skills,
+    !!filters.field_of_study.length,
+    !!filters.required_skills.length,
     !!filters.exp_years,
     !!filters.preferred_city || !!filters.preferred_state || !!filters.preferred_country,
   ].filter(Boolean).length
@@ -163,19 +163,34 @@ export default function CandidateSearch({ API_BASE_URL, EDUCATION_LEVELS = [], W
                 </select>
               </FilterSection>
 
-              <FilterSection title="Field of Study">
-                <select
-                  className="field-select"
-                  value={filters.field_of_study}
-                  onChange={e => setFilters(f => ({ ...f, field_of_study: e.target.value }))}
-                >
-                  <option value="">Any</option>
-                  {FIELDS_OF_STUDY.map(f => (
-                    <option key={f} value={f}>{f}</option>
-                  ))}
-                </select>
-              </FilterSection>
+              <MultiSelectDropdown
+                options={FIELDS_OF_STUDY}
+                selected={filters.field_of_study}
+                onToggle={f => {
+                  console.log("Toggling field of study:", f);
+                  const updatedFields = filters.field_of_study.includes(f)
+                    ? filters.field_of_study.filter(x => x !== f)
+                    : [...filters.field_of_study, f];
+                  console.log("Updated fields:", updatedFields);
+                  setFilters(f => ({ ...f, field_of_study: updatedFields }));
+                }}
+                title="Field of Study"S
+              />
 
+              <MultiSelectDropdown
+                options={skill}
+                selected={filters.required_skills}
+                onToggle={f => {
+                  console.log("Toggling skills:", f);
+                  const updatedskills = filters.required_skills.includes(f)
+                    ? filters.required_skills.filter(x => x !== f)
+                    : [...filters.required_skills, f];
+                  console.log("Updated skills:", updatedskills);
+                  setFilters(f => ({ ...f, required_skills: updatedskills }));
+                }}
+                title="Required Skills"
+              />
+{/* 
               <FilterSection title="Skill">
                 <select
                   className="field-select"
@@ -187,7 +202,7 @@ export default function CandidateSearch({ API_BASE_URL, EDUCATION_LEVELS = [], W
                     <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
-              </FilterSection>
+              </FilterSection> */}
 
               <FilterSection title="Min. Years of Experience">
                 <input
@@ -284,6 +299,75 @@ function FilterSection({ title, children }) {
     <div className="filter-section">
       <p className="filter-section-title">{title}</p>
       {children}
+    </div>
+  )
+}
+
+
+function MultiSelectDropdown({ options, selected, onToggle, title }) {
+  const [open, setOpen] = useState(false)
+  const [dropdownStyle, setDropdownStyle] = useState({})
+  const triggerRef = useRef(null)
+  const wrapperRef = useRef(null)
+
+  useEffect(() => {
+    if (open && triggerRef.current && wrapperRef.current) {
+      const trigger = triggerRef.current
+      // position absolutely relative to wrapper so it moves with scrolling
+      setDropdownStyle({
+        position: 'absolute',
+        top: trigger.offsetTop + trigger.offsetHeight + 4,
+        left: trigger.offsetLeft,
+        width: trigger.offsetWidth,
+        zIndex: 9999,
+        background: '#fff',
+        border: '1.5px solid var(--border)',
+        borderRadius: 'var(--radius-sm)',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+        maxHeight: '210px',
+        overflowY: 'auto',
+        padding: '6px 0',
+      })
+    }
+  }, [open])
+
+  // close when clicking outside
+  useEffect(() => {
+    const handler = (e) => {
+      if (open && wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  return (
+    <div className="filter-section" style={{ position: 'relative' }} ref={wrapperRef}>
+      <p className="filter-section-title">{title}</p>
+
+      <div ref={triggerRef}>
+        <button
+          type="button"
+          className="field-select"
+          onClick={() => setOpen(o => !o)}
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+        >
+          <span>{selected && selected.length ? `${selected.length} selected` : 'Select skills'}</span>
+          <span style={{ marginLeft: 8 }}></span>
+        </button>
+      </div>
+
+      {open && (
+        <div style={dropdownStyle}>
+          {(options || []).map(opt => (
+            <label key={opt} style={{ display: 'flex', alignItems: 'center', padding: '6px 12px', cursor: 'pointer' }}>
+              <input type="checkbox" checked={selected?.includes(opt)} onChange={() => onToggle(opt)} />
+              <span style={{ marginLeft: 8 }}>{opt}</span>
+            </label>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
