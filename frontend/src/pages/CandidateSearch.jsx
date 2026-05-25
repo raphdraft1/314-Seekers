@@ -353,7 +353,7 @@ function MultiSelectDropdown({ options, selected, onToggle, title }) {
           onClick={() => setOpen(o => !o)}
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
-          <span>{selected && selected.length ? `${selected.length} selected` : 'Select skills'}</span>
+          <span>{selected && selected.length ? `${selected.length} selected` : 'Select'}</span>
           <span style={{ marginLeft: 8 }}></span>
         </button>
       </div>
