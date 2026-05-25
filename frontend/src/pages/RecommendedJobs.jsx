@@ -1,5 +1,6 @@
 import { useState, useEffect, use } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { apiFetch } from '../utils/api'
 import DashNav from '../components/DashNav'
 
 export default function RecommendedJobs({ API_BASE_URL }) {
@@ -15,9 +16,8 @@ export default function RecommendedJobs({ API_BASE_URL }) {
   //Change membership
   const toggleMembership = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/membership`, {
+      const res = await apiFetch(`${API_BASE_URL}/membership`, {
         method: 'POST',
-        credentials: 'include'
       })
       if (res.ok) {
         const data = await res.json()
@@ -37,9 +37,8 @@ export default function RecommendedJobs({ API_BASE_URL }) {
     setLoading(true)
     try {
       // TODO: Backend needs GET /recommendations/jobs?page=X
-      const res = await fetch(`${API_BASE_URL}/recommendations/jobs`, { 
+      const res = await apiFetch(`${API_BASE_URL}/recommendations/jobs`, { 
         method: 'POST',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ page: pageNum })
       })

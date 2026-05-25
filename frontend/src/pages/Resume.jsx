@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { apiFetch } from '../utils/api'
 import DashNav from '../components/DashNav'
 
 const PLACEHOLDER_SEEKER = {
@@ -131,7 +132,7 @@ export default function Resume({ FIELDS_OF_STUDY = [], WORK_MODES = [], EDUCATIO
 
   useEffect(() => {
     const fetchData = async () => {
-      const seekerResponse = await fetch(`${API_BASE_URL}/getSeeker`, { method: 'POST', credentials: 'include' })
+      const seekerResponse = await apiFetch(`${API_BASE_URL}/getSeeker`, { method: 'POST', })
       if (seekerResponse.ok) {
         const data = await seekerResponse.json()
         const seekerData = data.seeker
@@ -142,7 +143,7 @@ export default function Resume({ FIELDS_OF_STUDY = [], WORK_MODES = [], EDUCATIO
         })
       }
 
-      const resumeResponse = await fetch(`${API_BASE_URL}/resume`, { method: 'POST', credentials: 'include' })
+      const resumeResponse = await apiFetch(`${API_BASE_URL}/resume`, { method: 'POST', })
       if (resumeResponse.ok) {
         const data = await resumeResponse.json()
         const resumeData = data.resumes[0]
@@ -172,9 +173,8 @@ export default function Resume({ FIELDS_OF_STUDY = [], WORK_MODES = [], EDUCATIO
     setSaving(true)
     setApiError('')
     try {
-      const res = await fetch(`${API_BASE_URL}/updateResume`, {
+      const res = await apiFetch(`${API_BASE_URL}/updateResume`, {
         method: 'PUT',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           fields: {

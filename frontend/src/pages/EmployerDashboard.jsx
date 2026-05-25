@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { apiFetch } from '../utils/api'
 import DashNav from '../components/DashNav'
 
 export default function EmployerDashboard({ API_BASE_URL }) {
@@ -13,20 +14,15 @@ export default function EmployerDashboard({ API_BASE_URL }) {
     const fetchData = async () => {
       try {
         let jobId = null
-        const companyRes = await fetch(`${API_BASE_URL}/getCompany`, {
+        const companyRes = await apiFetch(`${API_BASE_URL}/getCompany`, {
           method: 'POST',
-          credentials: 'include',
         })
         if (companyRes.ok) {
           const data = await companyRes.json()
           setCompany(data.company)
-        } else {
-          navigate('/')
         }
 
-        const jobsRes = await fetch(`${API_BASE_URL}/all_postings`, {
-          credentials: 'include',
-        })
+        const jobsRes = await apiFetch(`${API_BASE_URL}/all_postings`, {})
         if (jobsRes.ok) {
           const data = await jobsRes.json()
           setJobPostings(data.postings || [])
@@ -34,9 +30,8 @@ export default function EmployerDashboard({ API_BASE_URL }) {
         }
 
         // TODO: Backend needs GET /recommendations/candidates?jobposting_id=X
-        const recRes = await fetch(`${API_BASE_URL}/recommendations/candidates`, {
+        const recRes = await apiFetch(`${API_BASE_URL}/recommendations/candidates`, {
           method: 'POST',
-          credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ "jobposting_id": jobId, "page": 1 }),
         })

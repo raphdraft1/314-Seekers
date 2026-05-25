@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { apiFetch } from '../utils/api'
 import DashNav from '../components/DashNav'
 
 export default function RecommendedCandidates({ API_BASE_URL }) {
@@ -18,7 +19,7 @@ export default function RecommendedCandidates({ API_BASE_URL }) {
     const fetchJobs = async () => {
       try {
       
-        const res = await fetch(`${API_BASE_URL}/all_postings`, { credentials: 'include' })
+        const res = await apiFetch(`${API_BASE_URL}/all_postings`, {})
         if (res.ok) {
           const data = await res.json()
           setJobPostings(data.postings || [])
@@ -42,9 +43,8 @@ export default function RecommendedCandidates({ API_BASE_URL }) {
   //Change membership
   const toggleMembership = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/membership`, {
+      const res = await apiFetch(`${API_BASE_URL}/membership`, {
         method: 'POST',
-        credentials: 'include'
       })
       if (res.ok) {
         const data = await res.json()
@@ -62,9 +62,9 @@ export default function RecommendedCandidates({ API_BASE_URL }) {
     setLoading(true)
     try {
      
-      const res = await fetch(
+      const res = await apiFetch(
         `${API_BASE_URL}/recommendations/candidates`,
-        { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jobposting_id: selectedJob, page: pageNum }) }
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jobposting_id: selectedJob, page: pageNum }) }
       )
       if (res.ok) {
         const data = await res.json()

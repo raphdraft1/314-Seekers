@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { apiFetch } from '../utils/api'
 import DashNav from '../components/DashNav'
 
 export default function ManageJobs({ API_BASE_URL }) {
@@ -11,7 +12,7 @@ export default function ManageJobs({ API_BASE_URL }) {
     const fetchJobs = async () => {
       try {
         // TODO: Backend needs GET /all_postings
-        const res = await fetch(`${API_BASE_URL}/all_postings`, { credentials: 'include' })
+        const res = await apiFetch(`${API_BASE_URL}/all_postings`, {})
         if (res.ok) {
           const data = await res.json()
           setJobs(data.postings || [])

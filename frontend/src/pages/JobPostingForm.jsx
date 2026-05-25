@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { apiFetch } from '../utils/api'
 import DashNav from '../components/DashNav'
 
 const EMPTY_FORM = {
@@ -33,7 +34,7 @@ export default function JobPostingForm({ API_BASE_URL, EDUCATION_LEVELS = [], WO
     const fetchJob = async () => {
       try {
         // TODO: Backend needs GET /jobpostings/:id
-        const res = await fetch(`${API_BASE_URL}/jobposting?jobId=${jobId}`, { credentials: 'include' })
+        const res = await apiFetch(`${API_BASE_URL}/jobposting?jobId=${jobId}`, {})
         if (res.ok) {
           const data = await res.json()
           const j = data.job
@@ -87,17 +88,15 @@ export default function JobPostingForm({ API_BASE_URL, EDUCATION_LEVELS = [], WO
       let res
       if (isEditing) {
         // TODO: Backend needs PUT /jobpostings/:id
-        res = await fetch(`${API_BASE_URL}/updatePosting?jobId=${jobId}`, {
+        res = await apiFetch(`${API_BASE_URL}/updatePosting?jobId=${jobId}`, {
           method: 'PUT',
-          credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         })
       } else {
         // TODO: Backend needs POST /jobpostings
-        res = await fetch(`${API_BASE_URL}/newPosting`, {
+        res = await apiFetch(`${API_BASE_URL}/newPosting`, {
           method: 'POST',
-          credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         })
@@ -119,9 +118,8 @@ export default function JobPostingForm({ API_BASE_URL, EDUCATION_LEVELS = [], WO
   const handleDelete = async () => {
     if (!window.confirm('Delete this job posting? This cannot be undone.')) return
     try {
-      const res = await fetch(`${API_BASE_URL}/deletePosting?jobId=${jobId}`, {
+      const res = await apiFetch(`${API_BASE_URL}/deletePosting?jobId=${jobId}`, {
         method: 'DELETE',
-        credentials: 'include',
       })
       if (res.ok) navigate('/jobs')
     } catch (err) {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { apiFetch } from '../utils/api'
 import DashNav from '../components/DashNav'
 
 export default function SeekerDashboard({ API_BASE_URL }) {
@@ -14,21 +15,16 @@ export default function SeekerDashboard({ API_BASE_URL }) {
     const fetchData = async () => {
       try {
         // Fetch seeker profile
-        const seekerRes = await fetch(`${API_BASE_URL}/getSeeker`, {
+        const seekerRes = await apiFetch(`${API_BASE_URL}/getSeeker`, {
           method: 'POST',
-          credentials: 'include',
         })
         if (seekerRes.ok) {
           const data = await seekerRes.json()
           setSeeker(data.seeker)
-        } else {
-          navigate('/')
         }
 
         // Fetch 3 job postings 
-        const jobsRes = await fetch(`${API_BASE_URL}/search`, {
-          credentials: 'include',
-        })
+        const jobsRes = await apiFetch(`${API_BASE_URL}/search`, {})
         if (jobsRes.ok) {
           const data = await jobsRes.json()
           setJobs((data.jobs || []).slice(0, 3))
@@ -43,9 +39,8 @@ export default function SeekerDashboard({ API_BASE_URL }) {
     const fetchRecommended = async () => {
       try {
         // Get 3 recommendations
-        const res = await fetch(`${API_BASE_URL}/recommendations/jobs`, {
+        const res = await apiFetch(`${API_BASE_URL}/recommendations/jobs`, {
           method: 'POST',
-          credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ page: 1 })
         })

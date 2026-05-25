@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, use } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { apiFetch } from '../utils/api'
 import DashNav from '../components/DashNav'
 
 export default function JobSearch({ API_BASE_URL, EDUCATION_LEVELS = [], WORK_MODES = [], FIELDS_OF_STUDY = [] }) {
@@ -34,7 +35,7 @@ export default function JobSearch({ API_BASE_URL, EDUCATION_LEVELS = [], WORK_MO
   //Query backend for locatiun and skill options for filters
   const fetchFilterOptions = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/search/filters`, { credentials: 'include'})
+      const response = await apiFetch(`${API_BASE_URL}/search/filters`, {})
       if (response.ok) {
         const data = await response.json()
         setCity(data.locations.cities || [])
@@ -63,9 +64,7 @@ export default function JobSearch({ API_BASE_URL, EDUCATION_LEVELS = [], WORK_MO
       if (filters.country) params.set('country', filters.country)
 
       //Job search endpoint
-      const res = await fetch(`${API_BASE_URL}/search?${params}`, {
-        credentials: 'include',
-      })
+      const res = await apiFetch(`${API_BASE_URL}/search?${params}`, {})
       if (res.ok) {
         const data = await res.json()
         setResults(data.jobs || [])

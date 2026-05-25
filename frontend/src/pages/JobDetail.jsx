@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { apiFetch } from '../utils/api'
 import DashNav from '../components/DashNav'
 
 export default function JobDetail({ API_BASE_URL }) {
@@ -14,7 +15,7 @@ export default function JobDetail({ API_BASE_URL }) {
   useEffect(() => {
     const fetchJob = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/jobposting?jobId=${jobId}`)
+        const res = await apiFetch(`${API_BASE_URL}/jobposting?jobId=${jobId}`)
         if (res.ok) {
           const data = await res.json()
           setJob(data.job)

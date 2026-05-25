@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { apiFetch } from '../utils/api'
 import DashNav from '../components/DashNav'
 // reads candidateId from URl
 export default function CandidateDetail({ API_BASE_URL }) {
@@ -13,9 +14,8 @@ export default function CandidateDetail({ API_BASE_URL }) {
     const fetchCandidate = async () => {
       try {
         // API call to fetch candidate resume by ID (Needs a route to get_resume_by_id)
-        const res = await fetch(`${API_BASE_URL}/resume`, {
+        const res = await apiFetch(`${API_BASE_URL}/resume`, {
           method: "POST",
-          credentials: 'include',
           headers: {
             'Content-Type': 'application/json'
           },
