@@ -195,7 +195,7 @@ export default function JobPostingForm({ API_BASE_URL, EDUCATION_LEVELS = [], WO
                 {form.required_skills.map(s => (
                   <span key={s} className="tag">{s}<button className="tag-remove" onClick={() => removeSkill(s)}>×</button></span>
                 ))}
-                <input className="tag-input-inner" placeholder={form.required_skills.length === 0 ? 'Type a skill and press Enter…' : ''} value={skillInput} onChange={e => setSkillInput(e.target.value)} onKeyDown={addSkill} />
+                <input className="tag-input-inner" placeholder={form.required_skills.length === 0 ? 'Type a skill and press Enter…' : ''} value={skillInput} onChange={e => setSkillInput(e.target.value.replace(/,/g, ''))} onKeyDown={addSkill} />
               </div>
               <p className="field-hint">Press Enter to add a skill</p>
               {errors.required_skills && <span className="field-error">{errors.required_skills}</span>}

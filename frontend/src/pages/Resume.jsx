@@ -65,7 +65,7 @@ function TagInput({ tags, onChange, placeholder }) {
           className="tag-input-inner"
           placeholder={tags.length === 0 ? placeholder : ''}
           value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={e => setInput(e.target.value.replace(/,/g, ''))}
           onKeyDown={addTag}
         />
       </div>

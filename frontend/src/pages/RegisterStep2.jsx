@@ -185,7 +185,7 @@ function SkillsSection({ data, onChange }) {
   const [input, setInput] = useState('')
 
   const addSkill = (e) => {
-    if (e.key === 'Enter' && input.trim()) {
+    if ((e.key === 'Enter' || e.key === ',') && input.trim()) {
       if (!data.skills.includes(input.trim())) onChange('skills', [...data.skills, input.trim()])
       setInput('')
     }
@@ -194,12 +194,12 @@ function SkillsSection({ data, onChange }) {
   return (
     <div className="section-content">
       <div className="field-group">
-        <label className="field-label">Skills <span className="field-note">(Press Enter to add)</span></label>
+        <label className="field-label">Skills <span className="field-note">(Type a skill and press Enter to add)</span></label>
         <input
           className="field-input"
           placeholder="e.g. Python, Project Management..."
           value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={e => setInput(e.target.value.replace(/,/g, ''))}
           onKeyDown={addSkill}
         />
         <div className="tags-row">
