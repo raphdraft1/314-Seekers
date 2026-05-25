@@ -1037,7 +1037,7 @@ class EnumGetter:
                 "q": "*",
                 "query_by": "required_skills",
                 "facet_by": "required_skills",
-                "max_facet_values": 100
+                "max_facet_values": 500
             })
             return [f["value"] for f in result["facet_counts"][0]["counts"]]
         
@@ -1046,7 +1046,7 @@ class EnumGetter:
                 "q": "*",
                 "query_by": "skills",
                 "facet_by": "skills",
-                "max_facet_values": 100
+                "max_facet_values": 500
             })
             return [f["value"] for f in result["facet_counts"][0]["counts"]]
         
