@@ -29,7 +29,7 @@ The application requires some dependencies that must first be installed on your 
 ## Environment Configuration  
 Prior to building and executing the system, it is necessary to first configure environment variables, ensuring they are set properly to be accessed by the system.  
 
-1. From the system directory `path/to/directory/314-Seekers`, navigate to frontend and create an environment file named `.env`. Paste the following contents into the file and save it:  
+1. From the system directory `path/to/directory/314-Seekers`, navigate to `frontend` and create an environment file named `.env`. Paste the following contents into the file and save it:  
     ```
     VITE_API_BASE_URL="http://localhost:5000/api"
     ```
@@ -90,22 +90,26 @@ Typesense will be available at **http://localhost:8108**.
     ```
     source venv/bin/activate
     ```
-    For Windows:
+    For Windows, if you're using command prompt:
     ```
-    venv/Scripts/activate.bat
+    "venv/Scripts/activate"
+    ```
+    or if you're using Powershell
+    ```
+    (Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned) ; (& "venv\Scripts\activate")
     ```
 
-3. Ensure the virtual environment is running and you are inside it. Install all backend dependencies:  
+4. Ensure the virtual environment is running and you are inside it. Install all backend dependencies:  
     ```
     pip install -r requirements.txt
     ```
 
-4. After all necessary packages are installed, seed the database first by running the seeding script. **It is only necessary to do this once** on initial setup, as data will persist in future sessions:  
+5. After all necessary packages are installed, seed the database first by running the seeding script. **It is only necessary to do this once** on initial setup, as data will persist in future sessions:  
     ```
     python ../seed-data/create-and-seed.py
     ```
 
-5. Run the Flask server:  
+6. Run the Flask server:  
     ```
     python run.py
     ```
