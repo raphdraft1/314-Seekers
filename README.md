@@ -131,10 +131,13 @@ The backend API should then be available at **http://localhost:5000**.
 3. Start the production server:  
     ```
     npm run build
+    npm install -g serve
+    serve -s dist
     ```
+    The frontend will be available at **http://localhost:3000**.
+
     Or alternatively, start the development server (for contributors):  
     ```
     npm run dev
     ```
-
-The frontend will be available at **http://localhost:5173**.
+    The frontend will be available at **http://localhost:5173**.
