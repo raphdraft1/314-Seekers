@@ -19,7 +19,7 @@ export default function CandidateDetail({ API_BASE_URL }) {
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ seeker_id: candidateId })
+          body: JSON.stringify({ resume_id: candidateId })
         })
         if (res.ok) {
           const data = await res.json()

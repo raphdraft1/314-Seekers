@@ -143,7 +143,7 @@ def get_resume():
 
     if session.get("user_type") != "seeker":
         data = request.get_json()
-        resumes = db_DA.get_all_resumes_by_seeker(seeker_id=data.get("seeker_id"))  
+        resumes = [db_DA.get_resume_by_id(resume_id=data.get("resume_id"))]  
     else:
         resumes = db_DA.get_all_resumes_by_seeker(seeker_id=session["user_id"])
 
@@ -258,7 +258,7 @@ def get_company():
 
 
 @api.route("/search", methods=["GET"])
-def get_jobs():
+def search():
 
     #Extract filter variables from query parameters
     query = request.args.get('q') or None
@@ -366,7 +366,7 @@ def get_filter_options():
 
 
 @api.route("/jobposting", methods=["GET"])
-def get_jobposting():
+def get_jobposting_detail():
     
     #Extract id 
     id = request.args.get("jobId") or None
@@ -447,7 +447,7 @@ def get_job_recommendations():
     
     #check if there are other pages
     nextJobs = db_DA.rank_jobpostings_by_resume(resumeId, page + 1)
-    if nextJobs is []:
+    if nextJobs == []:
         hasNext = False
     else:
         hasNext = True
@@ -459,7 +459,7 @@ def get_job_recommendations():
 
 #Get all employer job postings
 @api.route("/all_postings", methods=["GET"])
-def get_postings():
+def get_all_company_postings():
     
     postings = db_DA.get_all_jobpostings_by_company(session["user_id"])
 
@@ -597,7 +597,7 @@ def get_candidate_recommendations():
     
     #check if there are other pages
     nextCandidates = db_DA.rank_resumes_by_jobposting(jobId, page + 1)
-    if nextCandidates is []:
+    if nextCandidates == []:
         hasNext = False
     else:
         hasNext = True
