@@ -2,11 +2,20 @@ import os
 from app import db_DA, db_EG
 from dotenv import load_dotenv
 from flask import Blueprint, jsonify, request, session
-
+from functools import wraps
 
 load_dotenv()
 
 api = Blueprint("api", __name__)
+
+# Strictly require login
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not all(k in session for k in ("user_id", "user_type", "membership")):
+            return jsonify({"error": "Unauthorized"}), 401
+        return f(*args, **kwargs)
+    return decorated
 
 #Connection test
 @api.route("/health", methods=["GET"])
@@ -124,11 +133,8 @@ def setup():
 
 #Upgrade membership
 @api.route("/membership", methods=["POST"])
+@login_required
 def upgrade():
-    membership = session.get("membership")
-    if membership is None:
-        return jsonify({"error": "Cookie error"}), 401
-    
     #Upgrade membership funct
     db_DA.update_membership(user_id=session["user_id"], user_type=session["user_type"])
 
@@ -139,6 +145,7 @@ def upgrade():
 
 #Get resume data for seeker
 @api.route("/resume", methods=["POST"])
+@login_required
 def get_resume():
 
     if session.get("user_type") != "seeker":
@@ -170,13 +177,8 @@ def get_resume():
 
 #Update resume
 @api.route("/updateResume", methods=["PUT"])
+@login_required
 def update_resume():
-    
-    #Extract id 
-    uid = session.get("user_id") or None
-    if not uid:
-        return jsonify({"error": "Cookie Error"}), 400
-
     data = request.get_json()
 
     #Get resume ID
@@ -205,10 +207,8 @@ def update_resume():
 
 #Get seeker data
 @api.route("/getSeeker", methods=["POST"])
+@login_required
 def get_seeker():
-    if "user_id" not in session:
-        print("No user_id in session")
-        return jsonify({"error": "Unauthorized"}), 401
     seeker = db_DA.get_seeker_by_identifier(seeker_id=session["user_id"])
     if not seeker:
         return jsonify({"error": "Seeker not found"}), 404
@@ -230,10 +230,8 @@ def get_seeker():
 
 #Get company data
 @api.route("/getCompany", methods=["POST"])
+@login_required
 def get_company():
-    if "user_id" not in session:
-        print("No user_id in session")
-        return jsonify({"error": "Unauthorized"}), 401
     company = db_DA.get_company_by_identifier(company_id=session["user_id"])
     if not company:
         return jsonify({"error": "Company not found"}), 404
@@ -258,6 +256,7 @@ def get_company():
 
 
 @api.route("/search", methods=["GET"])
+@login_required
 def search():
 
     #Extract filter variables from query parameters
@@ -346,26 +345,20 @@ def search():
 
 #Gte filter options for search page
 @api.route("/search/filters", methods=["GET"])
+@login_required
 def get_filter_options():
-
-    #Cookie existence check
-    if "user_type" not in session:
-        print("No user_id or user_type in session")
-        return jsonify({"error": "No cookie found"}), 403
+    user_type = session.get("user_type")
+    if user_type not in ("seeker", "company"):
+        return jsonify({"error": "Invalid user type"}), 403
     
-    locations = []
-    skills = [] 
-    if session.get("user_type") == "seeker":
-        locations = db_EG.get_unique_locations("seeker")
-        skills = db_EG.get_unique_skills("seeker")
-    else:
-        locations = db_EG.get_unique_locations("company")
-        skills = db_EG.get_unique_skills("company")
+    locations = db_EG.get_unique_locations(user_type)
+    skills = db_EG.get_unique_skills(user_type)
 
     return jsonify({"locations": locations, "skills": skills})
 
 
 @api.route("/jobposting", methods=["GET"])
+@login_required
 def get_jobposting_detail():
     
     #Extract id 
@@ -400,6 +393,7 @@ def get_jobposting_detail():
     return jsonify({"job": job})
 
 @api.route("/recommendations/jobs", methods=["POST"])
+@login_required
 def get_job_recommendations():
     
     #Extract and validate data
@@ -459,6 +453,7 @@ def get_job_recommendations():
 
 #Get all employer job postings
 @api.route("/all_postings", methods=["GET"])
+@login_required
 def get_all_company_postings():
     
     postings = db_DA.get_all_jobpostings_by_company(session["user_id"])
@@ -488,6 +483,7 @@ def get_all_company_postings():
 
 #Update job posting
 @api.route("/updatePosting", methods=["PUT"])
+@login_required
 def update_posting():
     
     #Extract id 
@@ -518,11 +514,8 @@ def update_posting():
 
 #Create new job posting
 @api.route("/newPosting", methods=["POST"])
-def create_posting():
-    #cookie check
-    if "user_id" not in session:
-        return jsonify({"error": "Cookie Error"}), 401
-    
+@login_required
+def create_posting():    
     data = request.get_json()
     print (data)
     if( db_DA.create_jobposting(
@@ -546,11 +539,8 @@ def create_posting():
 
 #Delete job posting
 @api.route("/deletePosting", methods=["DELETE"])
+@login_required
 def delete_posting():
-    #cookie check
-    if "user_id" not in session:
-        return jsonify({"error": "Unauthorized"}), 401
-    
     #Extract id 
     id = request.args.get("jobId") or None
     if not id:
@@ -564,6 +554,7 @@ def delete_posting():
 
 #Get recommended candidates by jobposting
 @api.route("/recommendations/candidates", methods=["POST"])
+@login_required
 def get_candidate_recommendations():
     
     #Extract and validate data
