@@ -94,7 +94,7 @@ Typesense will be available at **http://localhost:8108**.
     ```
     "venv/Scripts/activate"
     ```
-    or if you're using Powershell
+    or if you're using Powershell:
     ```
     (Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned) ; (& "venv\Scripts\activate")
     ```
@@ -130,7 +130,7 @@ The backend API should then be available at **http://localhost:5000**.
 
 3. Start the production server:  
     ```
-    npm start
+    npm run build
     ```
     Or alternatively, start the development server (for contributors):  
     ```
