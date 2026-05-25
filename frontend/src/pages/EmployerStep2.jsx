@@ -37,7 +37,7 @@ export default function EmployerStep2() {
     if (!form.industry.trim()) e.industry = 'Industry is required'
     if (!form.city.trim()) e.city = 'City is required'
     if (!form.state.trim()) e.state = 'State is required'
-    if (!form.country) e.country = 'Please select a country'
+    if (!form.country) e.country = 'Country is required'
     return e
   }
 
@@ -122,10 +122,7 @@ export default function EmployerStep2() {
             {/* Country */}
             <div className="field-group">
               <label className="field-label">Country <span className="required">*</span></label>
-              <select className={`field-select ${errors.country ? 'error' : ''}`} name="country" value={form.country} onChange={handleChange}>
-                <option value="">Select country</option>
-                {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
+              <input className={`field-input ${errors.country ? 'error' : ''}`} name="country" placeholder="Enter country" value={form.country} onChange={handleChange} />
               {errors.country && <span className="field-error">{errors.country}</span>}
             </div>
 
