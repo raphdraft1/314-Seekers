@@ -49,7 +49,7 @@ export default function EmployerStep2() {
     const e = validate()
     if (Object.keys(e).length > 0) { setErrors(e); return }
     saveToSession(form)
-    navigate('/register/employer/step3')
+    navigate('/register/company/step3')
   }
 
   return (
@@ -130,7 +130,7 @@ export default function EmployerStep2() {
           </div>
 
           <div className="form-nav">
-            <button className="btn-secondary" onClick={() => navigate('/register/employer/step1')}>Back</button>
+            <button className="btn-secondary" onClick={() => navigate('/register/company/step1')}>Back</button>
             <button className="btn-primary" onClick={handleContinue}>Continue</button>
           </div>
         </div>

@@ -16,7 +16,7 @@ export default function EmployerStep3() {
   const handleRegister = async () => {
     if (!step1.email || !step1.password) {
       alert('Registration data is missing. Please start from Step 1.')
-      navigate('/register/employer/step1')
+      navigate('/register/company/step1')
       return
     }
 
@@ -87,7 +87,7 @@ export default function EmployerStep3() {
             <div className="review-section">
               <div className="review-section-header">
                 <h3>Account</h3>
-                <button className="edit-link" onClick={() => navigate('/register/employer/step1')}>Edit</button>
+                <button className="edit-link" onClick={() => navigate('/register/company/step1')}>Edit</button>
               </div>
               <ReviewRow label="Name" value={step1.fullName} />
               <ReviewRow label="Email" value={step1.email} />
@@ -96,7 +96,7 @@ export default function EmployerStep3() {
             <div className="review-section">
               <div className="review-section-header">
                 <h3>Company Overview</h3>
-                <button className="edit-link" onClick={() => navigate('/register/employer/step2')}>Edit</button>
+                <button className="edit-link" onClick={() => navigate('/register/company/step2')}>Edit</button>
               </div>
               <ReviewRow label="Company Name" value={profile.companyName} />
               <ReviewRow label="Company Email" value={profile.companyEmail} />
@@ -110,7 +110,7 @@ export default function EmployerStep3() {
               <div className="review-section">
                 <div className="review-section-header">
                   <h3>Company Culture</h3>
-                  <button className="edit-link" onClick={() => navigate('/register/employer/step2')}>Edit</button>
+                  <button className="edit-link" onClick={() => navigate('/register/company/step2')}>Edit</button>
                 </div>
                 <ReviewBlock value={profile.culture} />
               </div>
@@ -120,7 +120,7 @@ export default function EmployerStep3() {
               <div className="review-section">
                 <div className="review-section-header">
                   <h3>Company Bio</h3>
-                  <button className="edit-link" onClick={() => navigate('/register/employer/step2')}>Edit</button>
+                  <button className="edit-link" onClick={() => navigate('/register/company/step2')}>Edit</button>
                 </div>
                 <ReviewBlock value={profile.bio} />
               </div>
@@ -135,7 +135,7 @@ export default function EmployerStep3() {
             </button>
 
             <div className="form-nav" style={{ marginTop: '12px' }}>
-              <button className="btn-secondary" onClick={() => navigate('/register/employer/step2')}>Back</button>
+              <button className="btn-secondary" onClick={() => navigate('/register/company/step2')}>Back</button>
             </div>
           </div>
         </div>
