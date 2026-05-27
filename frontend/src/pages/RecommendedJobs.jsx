@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../utils/api'
 import DashNav from '../components/DashNav'
 
-export default function RecommendedJobs({ API_BASE_URL }) {
+export default function RecommendedJobs({ API_BASE_URL, NON_MEMBER_LIMIT }) {
   const navigate = useNavigate()
   const [jobs, setJobs] = useState([])
   const [loading, setLoading] = useState(true)
@@ -121,7 +121,7 @@ export default function RecommendedJobs({ API_BASE_URL }) {
               ))}
             </div>
 
-            {hasMore && (
+            {isMember && hasMore && (
               <div style={{ textAlign: 'center', marginTop: 24 }}>
                 <button
                   className="btn-secondary"
@@ -133,10 +133,18 @@ export default function RecommendedJobs({ API_BASE_URL }) {
               </div>
             )}
 
-            {!hasMore && jobs.length > 0 && (
-              <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 13, marginTop: 24 }}>
-                {isMember ? 'All matches shown.' : `Showing top 10 matches. Upgrade to see more.`}
-              </p>
+            {isMember ? (
+              !hasMore && jobs.length > 0 && (
+                <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 13, marginTop: 24 }}>
+                  All matches shown.
+                </p>
+              )
+            ) : (
+              jobs.length >= NON_MEMBER_LIMIT && (
+                <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 13, marginTop: 24 }}>
+                  Showing top 10 matches. Upgrade to see more.
+                </p>
+              )
             )}
           </>
         )}

@@ -40,7 +40,7 @@ class DataAccess:
     """
     def __init__(self, connection: Connection):
         self.client = connection.client
-        self.model = SentenceTransformer("all-MiniLM-L6-v2")
+        #self.model = SentenceTransformer("all-MiniLM-L6-v2")
 
     def create_seeker(self, full_name: str, email: str, age: int, city: str, state: str, country: str, 
                      short_desc: str, bio: str, password: str) -> bool:
@@ -715,7 +715,7 @@ class DataAccess:
                     
                     "vector_query": f"resume_embedding:({jobposting_to_use.jobposting_embedding}, k:{return_top_k})",
                     "page": page_number,
-                    "per_page": 20,
+                    "per_page": return_top_k,
                     "include_fields": "$seekers(full_name, email)"
             }]})
 
@@ -759,7 +759,7 @@ class DataAccess:
                     
                     "vector_query": f"jobposting_embedding:({resume_to_use.resume_embedding}, k:{return_top_k})",
                     "page": page_number,
-                    "per_page": 20,
+                    "per_page": return_top_k,
                     "include_fields": "$companies(company_name, email)"
             }]})
             

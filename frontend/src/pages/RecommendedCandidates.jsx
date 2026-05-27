@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../utils/api'
 import DashNav from '../components/DashNav'
 
-export default function RecommendedCandidates({ API_BASE_URL }) {
+export default function RecommendedCandidates({ API_BASE_URL, NON_MEMBER_LIMIT }) {
   const navigate = useNavigate()
   const [candidates, setCandidates] = useState([])
   const [jobPostings, setJobPostings] = useState([])
@@ -168,12 +168,26 @@ export default function RecommendedCandidates({ API_BASE_URL }) {
               ))}
             </div>
 
-            {hasMore && (
+            {isMember && hasMore && (
               <div style={{ textAlign: 'center', marginTop: 24 }}>
                 <button className="btn-secondary" onClick={() => fetchCandidates(page + 1)} disabled={loading}>
                   {loading ? 'Loading…' : 'Load more'}
                 </button>
               </div>
+            )}
+
+            {isMember ? (
+              !hasMore && candidates.length > 0 && (
+                <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 13, marginTop: 24 }}>
+                  All matches shown.
+                </p>
+              )
+            ) : (
+              candidates.length >= NON_MEMBER_LIMIT && (
+                <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 13, marginTop: 24 }}>
+                  Showing top 10 matches. Upgrade to see more.
+                </p>
+              )
             )}
           </>
         )}

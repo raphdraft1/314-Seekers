@@ -30,6 +30,7 @@ import CandidateDetail from './pages/CandidateDetail'
 import HealthCheck from './test.jsx'
 
 function App() {
+  const NON_MEMBER_LIMIT = 1
   const [FIELDS_OF_STUDY, setFieldsOfStudy] = useState([])
   const [WORK_MODES, setWorkModes] = useState([])
   const [EDUCATION_LEVELS, setEducationLevels] = useState([])
@@ -95,8 +96,8 @@ function App() {
       } />
       <Route path="/recommended" element={
         userType === 'company'
-          ? <RecommendedCandidates API_BASE_URL={API_BASE_URL} />
-          : <RecommendedJobs API_BASE_URL={API_BASE_URL} />
+          ? <RecommendedCandidates API_BASE_URL={API_BASE_URL} NON_MEMBER_LIMIT={NON_MEMBER_LIMIT} />
+          : <RecommendedJobs API_BASE_URL={API_BASE_URL} NON_MEMBER_LIMIT={NON_MEMBER_LIMIT} />
       } />
 
       {/* Seeker only */}
