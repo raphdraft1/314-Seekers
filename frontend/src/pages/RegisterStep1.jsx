@@ -12,10 +12,20 @@ export default function RegisterStep1() {
   const [showConfirm, setShowConfirm] = useState(false)
   const [errors, setErrors] = useState({})
 
+  console.log(role)
+  // Display different text field labels and prompts depending on who is registering
+  const isCompany = role === 'company'
+
+  const labels = {
+    fullName: isCompany ? 'Company Name' : 'Full Name',
+    email: isCompany ? 'Company Email' : 'Email',
+    placeholder: isCompany ? 'Enter company name': 'Enter full name'
+  }
+
   const validate = () => {
     const e = {}
-    if (!form.fullName.trim()) e.fullName = 'Full name is required'
-    if (!form.email.trim()) e.email = 'Email is required'
+    if (!form.fullName.trim()) e.fullName = isCompany ? 'Company name is required' : 'Full name is required'
+    if (!form.email.trim()) e.email = isCompany ? 'Company Email is required' : 'Email is required'
     else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = 'Enter a valid email'
     if (!form.password) e.password = 'Password is required'
     else if (form.password.length < 8) e.password = 'Password must be at least 8 characters'
@@ -51,15 +61,18 @@ export default function RegisterStep1() {
       <div className="form-body">
         <div className="form-card">
           <h2 className="form-title">STEP 1: BASIC INFORMATION</h2>
-          <StepIndicator currentStep={1} />
+          <StepIndicator currentStep={1} labels={isCompany 
+            ? ['Basic Info', 'Company Details', 'Review'] 
+            : ['Basic Info', 'Resume Details', 'Review']
+          } />
 
           <div className="form-fields">
             <div className="field-group">
-              <label className="field-label">Full Name <span className="required">*</span></label>
+              <label className="field-label">{labels.fullName} <span className="required">*</span></label>
               <input
                 className={`field-input ${errors.fullName ? 'error' : ''}`}
                 name="fullName"
-                placeholder="Enter full name"
+                placeholder={labels.placeholder}
                 value={form.fullName}
                 onChange={handleChange}
               />
@@ -67,7 +80,7 @@ export default function RegisterStep1() {
             </div>
 
             <div className="field-group">
-              <label className="field-label">Email <span className="required">*</span></label>
+              <label className="field-label">{labels.email} <span className="required">*</span></label>
               <input
                 className={`field-input ${errors.email ? 'error' : ''}`}
                 name="email"

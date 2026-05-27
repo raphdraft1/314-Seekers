@@ -78,8 +78,8 @@ function App() {
       <Route path="/" element={<AccountType />} />
       <Route path="/login" element={<Login API_BASE_URL={API_BASE_URL} setUserType={setUserType} />} />
       <Route path="/register/:role/step1" element={<RegisterStep1 />} />
-      <Route path="/register/employer/step2" element={<EmployerStep2 />} />
-      <Route path="/register/employer/step3" element={<EmployerStep3 />} />
+      <Route path="/register/company/step2" element={<EmployerStep2 />} />
+      <Route path="/register/company/step3" element={<EmployerStep3 />} />
       <Route path="/register/:role/step2" element={<RegisterStep2 {...enumProps} />} />
       <Route path="/register/:role/step3" element={<RegisterStep3 API_BASE_URL={API_BASE_URL} />} />
 

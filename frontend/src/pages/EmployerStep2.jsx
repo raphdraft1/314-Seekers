@@ -21,7 +21,7 @@ export default function EmployerStep2() {
   const [form, setForm] = useState(() => {
     const saved = sessionStorage.getItem('employerProfile')
     return saved ? JSON.parse(saved) : {
-      companyName: '', companyEmail: '', shortDescription: '',
+      shortDescription: '',
       industry: '', foundedYear: '', city: '', state: '',
       country: '', culture: '', bio: '',
     }
@@ -30,9 +30,6 @@ export default function EmployerStep2() {
 
   const validate = () => {
     const e = {}
-    if (!form.companyName.trim()) e.companyName = 'Company name is required'
-    if (!form.companyEmail.trim()) e.companyEmail = 'Company email is required'
-    else if (!/\S+@\S+\.\S+/.test(form.companyEmail)) e.companyEmail = 'Enter a valid email'
     if (!form.shortDescription.trim()) e.shortDescription = 'Short description is required'
     if (!form.industry.trim()) e.industry = 'Industry is required'
     if (!form.city.trim()) e.city = 'City is required'
@@ -64,20 +61,6 @@ export default function EmployerStep2() {
           <StepIndicator currentStep={2} labels={['Basic Info', 'Company Details', 'Review']} />
 
           <div className="form-fields">
-
-            {/* Company Name */}
-            <div className="field-group">
-              <label className="field-label">Company Name <span className="required">*</span></label>
-              <input className={`field-input ${errors.companyName ? 'error' : ''}`} name="companyName" placeholder="e.g. Veloq Robotics" value={form.companyName} onChange={handleChange} />
-              {errors.companyName && <span className="field-error">{errors.companyName}</span>}
-            </div>
-
-            {/* Company Email */}
-            <div className="field-group">
-              <label className="field-label">Company Email <span className="required">*</span></label>
-              <input className={`field-input ${errors.companyEmail ? 'error' : ''}`} name="companyEmail" type="email" placeholder="e.g. hello@company.com" value={form.companyEmail} onChange={handleChange} />
-              {errors.companyEmail && <span className="field-error">{errors.companyEmail}</span>}
-            </div>
 
             {/* Short Description */}
             <div className="field-group">
