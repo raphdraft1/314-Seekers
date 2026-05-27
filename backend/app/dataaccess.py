@@ -40,7 +40,7 @@ class DataAccess:
     """
     def __init__(self, connection: Connection):
         self.client = connection.client
-        #self.model = SentenceTransformer("all-MiniLM-L6-v2")
+        self.model = SentenceTransformer("all-MiniLM-L6-v2")
 
     def create_seeker(self, full_name: str, email: str, age: int, city: str, state: str, country: str, 
                      short_desc: str, bio: str, password: str) -> bool:
