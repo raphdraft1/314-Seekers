@@ -3,12 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import StepIndicator from '../components/StepIndicator'
 
-const COUNTRIES = [
-  'Australia', 'United States', 'United Kingdom', 'Canada', 'New Zealand',
-  'Singapore', 'India', 'Germany', 'France', 'Japan', 'China', 'Brazil',
-  'South Korea', 'Netherlands', 'Sweden', 'Switzerland', 'Other'
-]
-
 const currentYear = new Date().getFullYear()
 const YEARS = Array.from({ length: 150 }, (_, i) => currentYear - i)
 
