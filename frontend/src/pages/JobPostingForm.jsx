@@ -17,6 +17,15 @@ const EMPTY_FORM = {
   country: '',
 }
 
+const getEducationValue = (education) => {
+  if (education == null) return 7
+  if (typeof education === 'object') {
+    const key = Object.keys(education)[0]
+    return key ? Number(key) : 7
+  }
+  return Number(education)
+}
+
 export default function JobPostingForm({ API_BASE_URL, EDUCATION_LEVELS = [], WORK_MODES = [], FIELDS_OF_STUDY = [] }) {
   const navigate = useNavigate()
   const { jobId } = useParams()
@@ -42,7 +51,7 @@ export default function JobPostingForm({ API_BASE_URL, EDUCATION_LEVELS = [], WO
             title: j.title || '',
             summary: j.summary || '',
             responsibilities: j.responsibilities || '',
-            required_education: j.required_education || 7,
+            required_education: getEducationValue(j.required_education),
             required_skills: j.required_skills || [],
             exp_years: j.exp_years ?? '',
             work_mode: j.work_mode || [],
@@ -114,6 +123,7 @@ export default function JobPostingForm({ API_BASE_URL, EDUCATION_LEVELS = [], WO
       setLoading(false)
     }
   }
+  console.log('Current form state:', form)
 
   const handleDelete = async () => {
     if (!window.confirm('Delete this job posting? This cannot be undone.')) return
@@ -203,7 +213,7 @@ export default function JobPostingForm({ API_BASE_URL, EDUCATION_LEVELS = [], WO
               {/* Education */}
               <div className="field-group">
                 <label className="field-label">Required Education</label>
-                <select className="field-select" value={form.required_education} onChange={e => update('required_education', parseInt(e.target.value))}>
+                <select className="field-select" value={getEducationValue(form.required_education)} onChange={e => update('required_education', parseInt(e.target.value))}>
                   {EDUCATION_LEVELS.map(l => <option key={l.value} value={l.value}>{l.value} — {l.label}</option>)}
                 </select>
               </div>

@@ -499,7 +499,7 @@ def update_posting():
         summary=data["summary"],
         responsibilities=data["responsibilities"],
         required_skills=data["required_skills"],
-        required_education=int(list(data["required_education"].keys())[0]),
+        required_education=data["required_education"],
         exp_years=data["exp_years"],
         work_mode=data["work_mode"],
         field_of_study=data["field_of_study"],
